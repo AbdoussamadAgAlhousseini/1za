@@ -191,14 +191,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"deactivated_at": string | null,"display_name": string,"id": string,"is_active": boolean,"login_phone": string | null,"role": Database["public"]['Enums']["app_role"],"updated_at": string
+                    "created_at": string,"deactivated_at": string | null,"deleted_at": string | null,"display_name": string,"id": string,"is_active": boolean,"login_phone": string | null,"role": Database["public"]['Enums']["app_role"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"deactivated_at"?: string | null,"display_name": string,"id": string,"is_active"?: boolean,"login_phone"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
+                    "created_at"?: string,"deactivated_at"?: string | null,"deleted_at"?: string | null,"display_name": string,"id": string,"is_active"?: boolean,"login_phone"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"deactivated_at"?: string | null,"display_name"?: string,"id"?: string,"is_active"?: boolean,"login_phone"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
+                    "created_at"?: string,"deactivated_at"?: string | null,"deleted_at"?: string | null,"display_name"?: string,"id"?: string,"is_active"?: boolean,"login_phone"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -580,6 +580,12 @@ isOneToOne: false
                            },
 "admin_create_subscription":
 { Args: { "p_athlete_id": string,"p_ends_on"?: string,"p_paid_on"?: string,"p_payment_amount"?: number,"p_payment_currency"?: string,"p_payment_method"?: Database["public"]['Enums']["payment_method"],"p_payment_reference"?: string,"p_plan_id": string,"p_renewed_from_id"?: string,"p_starts_on": string }; Returns: string
+                           },
+"admin_delete_agent":
+{ Args: { "p_reason": string,"p_user_id": string }; Returns: undefined
+                           },
+"admin_delete_athlete":
+{ Args: { "p_athlete_id": string,"p_matricule_confirmation": string,"p_reason": string }; Returns: Json
                            },
 "admin_log_agent_password_reset":
 { Args: { "p_user_id": string }; Returns: undefined

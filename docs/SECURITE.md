@@ -12,8 +12,9 @@
    rôle, valide, applique la règle métier et journalise.
 3. **Minimisation des données** : un sportif = un matricule. Les agents ne
    voient que ce qui est nécessaire au contrôle.
-4. **Traçabilité** : pas de suppression physique de l'historique ; annulations
-   motivées ; journal d'audit immuable.
+4. **Traçabilité** : pas de suppression physique de l'historique, sauf les
+   deux suppressions administratives ci-dessous ; annulations motivées ;
+   journal d'audit immuable.
 
 ## 2. Rôles
 
@@ -61,7 +62,9 @@ ces règles par appels directs à l'API.
 | Abonnements qui se chevauchent | Contrainte d'exclusion GiST sur `daterange(starts_on, ends_on)` |
 | Doublon de matricule | Contrainte d'unicité ; erreur explicite, jamais d'attribution silencieuse |
 | Modification d'un matricule | Déclencheur `ERR_IMMUTABLE` (même avec la clé service_role) |
-| Suppression d'historique | Déclencheurs interdisant `DELETE` sur sportifs, abonnements, passages, paiements |
+| Suppression d'historique | Déclencheurs interdisant `DELETE` sur sportifs, abonnements, passages, paiements (même avec la clé service_role). Seule `admin_delete_athlete` lève la protection, le temps de sa transaction |
+| Suppression d'un sportif | Administrateur uniquement ; motif obligatoire ; matricule à ressaisir. Efface le matricule et toutes ses données ; le journal garde l'action, le motif et les volumes, **sans** le matricule |
+| Suppression d'un agent | Administrateur uniquement ; motif obligatoire ; impossible sur soi-même ou sur un administrateur. Le compte de connexion est supprimé et le numéro libéré ; le profil reste en archive (nom) pour l'historique ; il ne peut pas être réactivé |
 | Altération du journal | Déclencheur interdisant `UPDATE/DELETE` sur `audit_logs` |
 | Injection SQL | Requêtes paramétrées (PostgREST) ; fonctions avec `search_path` vide et objets qualifiés |
 | Abus / énumération | Limitation de débit en base : 120 vérifications/min, 60 entrées-sorties/min par agent, 120 écritures admin/min, 20 exports/min ; limites de Supabase Auth sur les connexions |

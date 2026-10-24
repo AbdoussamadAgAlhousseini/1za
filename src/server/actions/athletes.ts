@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { reasonSchema, uuidSchema } from "@/lib/validation/common";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/server/auth";
 import { fail, fromDbError, fromZodError } from "@/server/action-result";
@@ -142,4 +144,32 @@ export async function checkMatriculeAvailability(raw: string): Promise<ActionRes
   const supabase = await createClient();
   const { data } = await supabase.from("athletes").select("id").eq("matricule", parsed.data).maybeSingle();
   return { ok: true, data: { available: !data, athleteId: data?.id } };
+}
+
+export async function deleteAthlete(input: {
+  athleteId: string;
+  matriculeConfirmation: string;
+  reason: string;
+}): Promise<ActionResult<{ subscriptions: number; payments: number; visits: number }>> {
+  await requireAdmin();
+  const parsed = z
+    .object({ athleteId: uuidSchema, matriculeConfirmation: z.string().max(32), reason: reasonSchema })
+    .safeParse(input);
+  if (!parsed.success) return fromZodError(parsed.error);
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_delete_athlete", {
+    p_athlete_id: parsed.data.athleteId,
+    p_matricule_confirmation: parsed.data.matriculeConfirmation,
+    p_reason: parsed.data.reason,
+  });
+  if (error) {
+    const res = fromDbError(error, "admin_delete_athlete");
+    if (!res.ok && res.code === "ERR_CONFIRMATION_MISMATCH") return { ...res, fieldErrors: { matriculeConfirmation: res.message } };
+    if (!res.ok && res.code === "ERR_REASON_REQUIRED") return { ...res, fieldErrors: { reason: res.message } };
+    return res;
+  }
+  revalidatePath("/sportifs");
+  revalidatePath("/tableau-de-bord");
+  return { ok: true, data: data as unknown as { subscriptions: number; payments: number; visits: number }, message: "Sportif supprimé définitivement." };
 }

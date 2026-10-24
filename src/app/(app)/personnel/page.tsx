@@ -13,7 +13,7 @@ export default async function StaffPage() {
   const today = await getToday();
   const supabase = await createClient();
   const [{ data: profiles }, { data: activity }] = await Promise.all([
-    supabase.from("profiles").select("id, display_name, role, is_active, login_phone, created_at, deactivated_at").order("display_name"),
+    supabase.from("profiles").select("id, display_name, role, is_active, login_phone, created_at, deactivated_at, deleted_at").order("display_name"),
     supabase.rpc("stats_agents", { p_from: addDays(today, -29), p_to: today }),
   ]);
 

@@ -13,6 +13,7 @@ import { StatTile } from "@/components/dashboard/stat-tile";
 import { AttendancePanel } from "@/components/charts/attendance-panel";
 import { SubscriptionHistory } from "@/components/athletes/subscription-history";
 import { AthleteHeaderActions } from "@/components/athletes/athlete-header-actions";
+import { DeleteAthlete } from "@/components/athletes/delete-athlete";
 import { formatDate, formatDateTime, formatDuration, formatNumber, formatRelativeDays, formatTime } from "@/lib/domain/format";
 import { formatMatricule } from "@/lib/domain/matricule";
 import type { SubscriptionValidity } from "@/lib/domain/status";
@@ -149,6 +150,11 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
             payments={payments}
             defaultCurrency={settings?.default_currency ?? "XOF"}
             today={today}
+          />
+          <DeleteAthlete
+            athleteId={athlete.id ?? ""}
+            matricule={athlete.matricule ?? ""}
+            counts={{ subscriptions: subscriptions.length, payments: payments.length, visits: athlete.visit_count ?? 0 }}
           />
         </div>
       </div>

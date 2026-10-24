@@ -30,6 +30,7 @@ export const ERROR_MESSAGES = {
   ERR_PHONE_DUPLICATE: "Ce numéro de téléphone est déjà utilisé par un autre compte.",
   ERR_USER_NOT_FOUND: "Compte introuvable.",
   ERR_IMMUTABLE: "Cette donnée historique ne peut pas être modifiée.",
+  ERR_CONFIRMATION_MISMATCH: "Le matricule saisi ne correspond pas à celui du sportif.",
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as Dropdown from "@radix-ui/react-dropdown-menu";
-import { AlertCircle, KeyRound, MoreHorizontal, Pencil, ShieldCheck, UserCheck, UserPlus, UserX, Users } from "lucide-react";
+import { AlertCircle, KeyRound, MoreHorizontal, Pencil, ShieldCheck, Trash2, UserCheck, UserPlus, UserX, Users } from "lucide-react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogFooter, ConfirmDialog } from "@/components
 import { Field, Input } from "@/components/ui/field";
 import { EmptyState, InlineAlert } from "@/components/ui/states";
 import { Table, TableContainer, TBody, Td, Th, THead, Tr } from "@/components/ui/table";
-import { createAgent, renameAgent, resetAgentPassword, setAgentActive } from "@/server/actions/staff";
+import { createAgent, deleteAgent, renameAgent, resetAgentPassword, setAgentActive } from "@/server/actions/staff";
+import { ReasonDialog } from "@/components/subscriptions/reason-dialog";
 import { safeAction } from "@/lib/safe-action";
 import { formatPhone } from "@/lib/auth/identity";
 import { formatDateTime, formatNumber } from "@/lib/domain/format";
@@ -28,6 +29,7 @@ export interface StaffRow {
   login_phone: string | null;
   created_at: string;
   deactivated_at: string | null;
+  deleted_at: string | null;
   entries_recorded: number;
   exits_recorded: number;
   last_activity_at: string | null;
@@ -38,12 +40,14 @@ type Dialogs =
   | { kind: "reset"; agent: StaffRow }
   | { kind: "rename"; agent: StaffRow }
   | { kind: "toggle"; agent: StaffRow }
+  | { kind: "delete"; agent: StaffRow }
   | null;
 
 export function StaffManager({ rows, timezone }: { rows: StaffRow[]; timezone: string }) {
   const router = useRouter();
   const [dialog, setDialog] = useState<Dialogs>(null);
-  const agents = rows.filter((r) => r.role === "agent");
+  const agents = rows.filter((r) => r.role === "agent" && !r.deleted_at);
+  const deletedCount = rows.filter((r) => r.role === "agent" && r.deleted_at).length;
   const admins = rows.filter((r) => r.role === "admin");
   const close = () => setDialog(null);
   const done = () => {
@@ -137,6 +141,12 @@ export function StaffManager({ rows, timezone }: { rows: StaffRow[]; timezone: s
         )}
       </Card>
 
+      {deletedCount > 0 ? (
+        <p className="-mt-3 mb-6 text-xs text-ink-muted">
+          {deletedCount} compte(s) d&apos;agent supprimé(s) : leurs opérations passées restent visibles dans la fréquentation et les rapports.
+        </p>
+      ) : null}
+
       <Card>
         <CardHeader eyebrow="Administration" title="Compte administrateur" description="Connexion par mot de passe seul (onglet « Administration »)." />
         <ul className="divide-y divide-line">
@@ -159,6 +169,21 @@ export function StaffManager({ rows, timezone }: { rows: StaffRow[]; timezone: s
       {dialog?.kind === "reset" ? <ResetPasswordDialog agent={dialog.agent} onClose={close} onDone={done} /> : null}
       {dialog?.kind === "rename" ? <RenameDialog agent={dialog.agent} onClose={close} onDone={done} /> : null}
       {dialog?.kind === "toggle" ? <ToggleDialog agent={dialog.agent} onClose={close} onDone={done} /> : null}
+      {dialog?.kind === "delete" ? (
+        <ReasonDialog
+          open
+          onOpenChange={(o) => !o && close()}
+          title="Supprimer le compte ?"
+          description={`Le compte de ${dialog.agent.display_name} (${formatPhone(dialog.agent.login_phone)}) sera supprimé définitivement : plus aucune connexion possible et le numéro pourra être réutilisé. Ses entrées et sorties passées restent dans l'historique, sous son nom.`}
+          confirmLabel="Supprimer le compte"
+          tone="danger"
+          onSubmit={async (reason) => {
+            const res = await deleteAgent({ userId: dialog.agent.id, reason });
+            if (res.ok) done();
+            return res;
+          }}
+        />
+      ) : null}
     </>
   );
 }
@@ -189,6 +214,10 @@ function AgentMenu({ agent, onAction }: { agent: StaffRow; onAction: (d: Dialogs
           >
             {agent.is_active ? <UserX /> : <UserCheck />}
             {agent.is_active ? "Révoquer l'accès" : "Rétablir l'accès"}
+          </Dropdown.Item>
+          <Dropdown.Item className={cn(item, "text-danger-700 data-[highlighted]:bg-danger-50")} onSelect={() => onAction({ kind: "delete", agent })}>
+            <Trash2 />
+            Supprimer le compte
           </Dropdown.Item>
         </Dropdown.Content>
       </Dropdown.Portal>

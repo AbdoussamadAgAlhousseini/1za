@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { reasonSchema, uuidSchema } from "@/lib/validation/common";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/server/auth";
@@ -15,8 +17,8 @@ const BAN_FOREVER = "876000h";
 
 async function assertAgent(userId: string) {
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("id, role").eq("id", userId).maybeSingle();
-  return data?.role === "agent";
+  const { data } = await supabase.from("profiles").select("id, role, deleted_at").eq("id", userId).maybeSingle();
+  return data?.role === "agent" && !data.deleted_at;
 }
 
 export async function createAgent(input: { displayName: string; phone: string; password: string }): Promise<ActionResult<{ userId: string }>> {
@@ -108,4 +110,27 @@ export async function renameAgent(input: { userId: string; displayName: string }
   if (error) return fromDbError(error, "admin_update_agent");
   revalidatePath("/personnel");
   return { ok: true, data: undefined, message: "Nom mis à jour." };
+}
+
+export async function deleteAgent(input: { userId: string; reason: string }): Promise<ActionResult> {
+  await requireAdmin();
+  const parsed = z.object({ userId: uuidSchema, reason: reasonSchema }).safeParse(input);
+  if (!parsed.success) return fromZodError(parsed.error);
+  if (!(await assertAgent(parsed.data.userId))) return fail(ERROR_MESSAGES.ERR_USER_NOT_FOUND);
+
+  // 1. Base : profil archivé (accès coupé immédiatement, numéro libéré, historique conservé).
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_delete_agent", { p_user_id: parsed.data.userId, p_reason: parsed.data.reason });
+  if (error) return fromDbError(error, "admin_delete_agent");
+
+  // 2. Authentification : suppression définitive du compte de connexion.
+  const { error: authError } = await createAdminClient().auth.admin.deleteUser(parsed.data.userId);
+  if (authError) {
+    // Le profil est déjà désactivé : aucun accès possible. On bloque aussi la connexion.
+    await createAdminClient().auth.admin.updateUserById(parsed.data.userId, { ban_duration: BAN_FOREVER });
+    console.error("[delete_agent] suppression du compte d'authentification impossible");
+  }
+
+  revalidatePath("/personnel");
+  return { ok: true, data: undefined, message: "Compte supprimé. Son historique est conservé et son numéro peut être réutilisé." };
 }

@@ -4,6 +4,8 @@ import { formatDate } from "./format";
 /** Libellés français des actions journalisées. */
 export const AUDIT_ACTIONS: Record<string, { label: string; tone: Tone }> = {
   "athlete.created": { label: "Sportif enregistré", tone: "success" },
+  "athlete.deleted": { label: "Sportif supprimé", tone: "danger" },
+  "staff.deleted": { label: "Compte d'agent supprimé", tone: "danger" },
   "subscription.created": { label: "Abonnement créé", tone: "success" },
   "subscription.renewed": { label: "Abonnement renouvelé", tone: "success" },
   "subscription.state_changed": { label: "État d'abonnement modifié", tone: "warning" },
@@ -41,6 +43,10 @@ export function describeAuditDetails(action: string, details: Record<string, unk
       return `${STATE_LABELS[s("from")] ?? s("from")} → ${STATE_LABELS[s("to")] ?? s("to")} · motif : ${s("reason")}`;
     case "payment.recorded":
       return `${s("amount")} ${s("currency")}`;
+    case "athlete.deleted":
+      return `Motif : ${s("reason")} · ${s("subscriptions")} abonnement(s), ${s("payments")} paiement(s), ${s("visits")} passage(s) effacés`;
+    case "staff.deleted":
+      return `Motif : ${s("reason")}`;
     case "payment.cancelled":
       return `Motif : ${s("reason")}`;
     case "visit.corrected":
