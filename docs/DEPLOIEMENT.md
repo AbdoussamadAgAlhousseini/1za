@@ -14,7 +14,9 @@ Toutes les valeurs secrètes restent dans Supabase et Vercel : **rien n'est à
 2. Vercel → Settings → Environment Variables : ajouter
    `NEXT_PUBLIC_SITE_URL` = l'adresse publique (ex. `https://stade26.ajasahel.org`), puis **Redeploy**.
 3. Ouvrir Supabase (bouton « Open in Supabase ») → **SQL Editor** → New query →
-   coller tout le contenu de [`supabase/installation-complete.sql`](../supabase/installation-complete.sql) → **Run**.
+   coller le contenu de [`supabase/installation/partie-1-sur-2.sql`](../supabase/installation/partie-1-sur-2.sql) → **Run** ;
+   puis New query → [`partie-2-sur-2.sql`](../supabase/installation/partie-2-sur-2.sql) → **Run** (l'éditeur
+   limite chaque requête à 100 000 caractères, d'où le découpage).
 4. Supabase → Authentication → réglages du §3 ci-dessous (inscriptions désactivées,
    Secure password change désactivé, Site URL).
 5. Compte administrateur : Supabase → **Authentication → Users → Add user → Create new user**
@@ -27,7 +29,7 @@ Toutes les valeurs secrètes restent dans Supabase et Vercel : **rien n'est à
    ```
 6. Connexion sur l'application : onglet **Administration**, mot de passe.
 
-`supabase/installation-complete.sql` est régénéré par `npm run sql:bundle` après
+Le dossier `supabase/installation/` est régénéré par `npm run sql:bundle` après
 toute nouvelle migration (à exécuter seulement les nouvelles migrations sur une
 base déjà installée).
 
