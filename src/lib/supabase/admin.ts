@@ -10,7 +10,8 @@ import type { Database } from "./database.types";
  * composant client (`server-only` le garantit à la compilation).
  */
 export function createAdminClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Nom classique ou nouveau format de clé secrète (intégration Vercel).
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
   if (!serviceRoleKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY n'est pas configurée sur le serveur.");
   }

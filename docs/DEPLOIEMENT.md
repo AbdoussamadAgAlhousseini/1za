@@ -4,6 +4,32 @@ Ce guide met l'application en production. Comptez environ 30 minutes.
 Toutes les valeurs secrètes restent dans Supabase et Vercel : **rien n'est à
 écrire dans le code ni dans Git**.
 
+## Voie rapide : sans terminal (Vercel + intégration Supabase)
+
+1. Vercel → importer le dépôt → **Supabase → Add** (« Create New Supabase Account »
+   si vous n'avez pas de compte) → région Paris si proposée → **Deploy**.
+   L'intégration renseigne automatiquement l'URL et les clés Supabase (les deux
+   formats de noms de clés sont acceptés par l'application).
+2. Vercel → Settings → Environment Variables : ajouter
+   `NEXT_PUBLIC_SITE_URL` = l'adresse publique (ex. `https://stade26.ajasahel.org`), puis **Redeploy**.
+3. Ouvrir Supabase (bouton « Open in Supabase ») → **SQL Editor** → New query →
+   coller tout le contenu de [`supabase/installation-complete.sql`](../supabase/installation-complete.sql) → **Run**.
+4. Supabase → Authentication → réglages du §3 ci-dessous (inscriptions désactivées,
+   Secure password change désactivé, Site URL).
+5. Compte administrateur : Supabase → **Authentication → Users → Add user → Create new user**
+   - Email : `administration@stade26.invalid`
+   - Password : votre mot de passe administrateur (12 caractères min., majuscule, minuscule, chiffre)
+   - cocher **Auto Confirm User**
+   puis dans le **SQL Editor** :
+   ```sql
+   select private.bootstrap_first_admin('administration@stade26.invalid', 'Direction du stade');
+   ```
+6. Connexion sur l'application : onglet **Administration**, mot de passe.
+
+`supabase/installation-complete.sql` est régénéré par `npm run sql:bundle` après
+toute nouvelle migration (à exécuter seulement les nouvelles migrations sur une
+base déjà installée).
+
 ## 0. Prérequis
 
 - Un compte **Supabase** (https://supabase.com) et un compte **Vercel** (https://vercel.com).
@@ -68,6 +94,13 @@ limitent les tentatives de connexion par adresse IP).
 > aucun fournisseur SMS n'est nécessaire.
 
 ## 4. Créer le projet Vercel
+
+Domaine personnalisé (ex. sous-domaine d'un domaine acheté chez WordPress.com) :
+Vercel → Settings → **Domains** → ajouter `stade26.ajasahel.org` ; Vercel indique un
+enregistrement **CNAME** à créer. Chez WordPress.com : Mises à niveau → Domaines →
+le domaine → **Enregistrements DNS** → Ajouter → type CNAME, nom d'hôte `stade26`,
+valeur donnée par Vercel. Le HTTPS est activé automatiquement après propagation.
+
 
 1. Vercel → **Add New → Project** → importez le dépôt GitHub.
 2. Framework : **Next.js** (détecté automatiquement). Commandes par défaut.

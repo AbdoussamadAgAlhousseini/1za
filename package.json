@@ -14,7 +14,8 @@
     "e2e": "playwright test",
     "seed:dev": "node scripts/seed-dev.mjs",
     "admin:create": "node scripts/admin-account.mjs create",
-    "admin:reset-password": "node scripts/admin-account.mjs reset-password"
+    "admin:reset-password": "node scripts/admin-account.mjs reset-password",
+    "sql:bundle": "node scripts/build-sql-bundle.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
