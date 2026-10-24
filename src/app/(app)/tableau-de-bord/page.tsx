@@ -6,6 +6,7 @@ import {
   CalendarClock,
   CheckCircle2,
   CircleDashed,
+  CloudOff,
   Clock3,
   DoorOpen,
   Hourglass,
@@ -36,7 +37,7 @@ export const metadata: Metadata = { title: "Tableau de bord" };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const staff = await requireAdmin();
-  const { stats, attendance, expiring, expired, recent } = await getDashboardData();
+  const { stats, attendance, expiring, expired, recent, offlineIssues } = await getDashboardData();
   const params = await searchParams;
   const tz = staff.timezone;
 
@@ -75,6 +76,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       {params["mot-de-passe"] === "modifie" ? (
         <InlineAlert tone="success" icon={<CheckCircle2 />} className="mb-6">
           Votre mot de passe a été modifié.
+        </InlineAlert>
+      ) : null}
+
+      {offlineIssues > 0 ? (
+        <InlineAlert tone="warning" icon={<CloudOff />} title="Opérations hors ligne à vérifier" className="mb-6">
+          {offlineIssues} entrée(s) ou sortie(s) enregistrée(s) sans réseau n&apos;ont pas pu être appliquées.{" "}
+          <Link href="/frequentation" className="font-semibold underline underline-offset-2">
+            Vérifier
+          </Link>
         </InlineAlert>
       ) : null}
 

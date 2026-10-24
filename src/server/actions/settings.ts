@@ -13,6 +13,7 @@ const settingsSchema = z.object({
   expiringSoonDays: z.coerce.number().int().min(1, "Entre 1 et 60 jours.").max(60, "Entre 1 et 60 jours."),
   longVisitHours: z.coerce.number().int().min(1, "Entre 1 et 24 heures.").max(24, "Entre 1 et 24 heures."),
   defaultCurrency: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, "Code sur 3 lettres (ex. XOF)."),
+  offlineSnapshotHours: z.coerce.number().int().min(1, "Entre 1 et 72 heures.").max(72, "Entre 1 et 72 heures."),
 });
 
 export async function updateSettings(input: z.input<typeof settingsSchema>): Promise<ActionResult> {
@@ -27,6 +28,7 @@ export async function updateSettings(input: z.input<typeof settingsSchema>): Pro
     p_expiring_soon_days: v.expiringSoonDays,
     p_long_visit_hours: v.longVisitHours,
     p_default_currency: v.defaultCurrency,
+    p_offline_snapshot_hours: v.offlineSnapshotHours,
   });
   if (error) {
     const res = fromDbError(error, "admin_update_settings");

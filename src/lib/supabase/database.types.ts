@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "app_settings": {
                   Row: {
-                    "default_currency": string,"expiring_soon_days": number,"id": boolean,"long_visit_hours": number,"stadium_name": string,"timezone": string,"updated_at": string,"updated_by": string | null
+                    "default_currency": string,"expiring_soon_days": number,"id": boolean,"long_visit_hours": number,"offline_snapshot_hours": number,"stadium_name": string,"timezone": string,"updated_at": string,"updated_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "default_currency"?: string,"expiring_soon_days"?: number,"id"?: boolean,"long_visit_hours"?: number,"stadium_name"?: string,"timezone"?: string,"updated_at"?: string,"updated_by"?: string | null
+                    "default_currency"?: string,"expiring_soon_days"?: number,"id"?: boolean,"long_visit_hours"?: number,"offline_snapshot_hours"?: number,"stadium_name"?: string,"timezone"?: string,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Update: {
-                    "default_currency"?: string,"expiring_soon_days"?: number,"id"?: boolean,"long_visit_hours"?: number,"stadium_name"?: string,"timezone"?: string,"updated_at"?: string,"updated_by"?: string | null
+                    "default_currency"?: string,"expiring_soon_days"?: number,"id"?: boolean,"long_visit_hours"?: number,"offline_snapshot_hours"?: number,"stadium_name"?: string,"timezone"?: string,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -80,6 +80,56 @@ isOneToOne: false
       columns: ["actor_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"offline_operations": {
+                  Row: {
+                    "agent_id": string,"athlete_id": string | null,"id": string,"kind": string,"occurred_at": string,"reason_code": string | null,"received_at": string,"result": string,"review_note": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"visit_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "agent_id": string,"athlete_id"?: string | null,"id": string,"kind": string,"occurred_at": string,"reason_code"?: string | null,"received_at"?: string,"result": string,"review_note"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"visit_id"?: string | null
+                  }
+                  Update: {
+                    "agent_id"?: string,"athlete_id"?: string | null,"id"?: string,"kind"?: string,"occurred_at"?: string,"reason_code"?: string | null,"received_at"?: string,"result"?: string,"review_note"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"visit_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "offline_operations_agent_id_fkey"
+      columns: ["agent_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_athlete_id_fkey"
+      columns: ["athlete_id"]
+isOneToOne: false
+      referencedRelation: "athlete_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_athlete_id_fkey"
+      columns: ["athlete_id"]
+isOneToOne: false
+      referencedRelation: "athletes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_reviewed_by_fkey"
+      columns: ["reviewed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_visit_id_fkey"
+      columns: ["visit_id"]
+isOneToOne: false
+      referencedRelation: "visit_log"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_visit_id_fkey"
+      columns: ["visit_id"]
+isOneToOne: false
+      referencedRelation: "visits"
       referencedColumns: ["id"]
     }
                   ]
@@ -237,14 +287,14 @@ isOneToOne: false
                   ]
                 },"visits": {
                   Row: {
-                    "athlete_id": string,"corrected_at": string | null,"corrected_by": string | null,"correction_reason": string | null,"duration_seconds": number | null,"entered_at": string,"entry_agent_id": string,"exit_agent_id": string | null,"exited_at": string | null,"id": string,"status": Database["public"]['Enums']["visit_status"],"subscription_id": string
+                    "athlete_id": string,"corrected_at": string | null,"corrected_by": string | null,"correction_reason": string | null,"duration_seconds": number | null,"entered_at": string,"entry_agent_id": string,"entry_offline": boolean,"exit_agent_id": string | null,"exit_offline": boolean,"exited_at": string | null,"id": string,"status": Database["public"]['Enums']["visit_status"],"subscription_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "athlete_id": string,"corrected_at"?: string | null,"corrected_by"?: string | null,"correction_reason"?: string | null,"duration_seconds"?: never,"entered_at"?: string,"entry_agent_id": string,"exit_agent_id"?: string | null,"exited_at"?: string | null,"id"?: string,"status"?: Database["public"]['Enums']["visit_status"],"subscription_id": string
+                    "athlete_id": string,"corrected_at"?: string | null,"corrected_by"?: string | null,"correction_reason"?: string | null,"duration_seconds"?: never,"entered_at"?: string,"entry_agent_id": string,"entry_offline"?: boolean,"exit_agent_id"?: string | null,"exit_offline"?: boolean,"exited_at"?: string | null,"id"?: string,"status"?: Database["public"]['Enums']["visit_status"],"subscription_id": string
                   }
                   Update: {
-                    "athlete_id"?: string,"corrected_at"?: string | null,"corrected_by"?: string | null,"correction_reason"?: string | null,"duration_seconds"?: never,"entered_at"?: string,"entry_agent_id"?: string,"exit_agent_id"?: string | null,"exited_at"?: string | null,"id"?: string,"status"?: Database["public"]['Enums']["visit_status"],"subscription_id"?: string
+                    "athlete_id"?: string,"corrected_at"?: string | null,"corrected_by"?: string | null,"correction_reason"?: string | null,"duration_seconds"?: never,"entered_at"?: string,"entry_agent_id"?: string,"entry_offline"?: boolean,"exit_agent_id"?: string | null,"exit_offline"?: boolean,"exited_at"?: string | null,"id"?: string,"status"?: Database["public"]['Enums']["visit_status"],"subscription_id"?: string
                   }
                   Relationships: [
                     {
@@ -325,6 +375,44 @@ isOneToOne: false
       columns: ["actor_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"offline_operation_log": {
+                  Row: {
+                    "agent_id": string,"agent_name": string | null,"athlete_id": string | null,"id": string,"kind": string,"matricule": string | null,"occurred_at": string,"reason_code": string | null,"received_at": string,"result": string,"review_note": string | null,"reviewed_at": string | null,"reviewed_by_name": string | null,"visit_id": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "offline_operations_agent_id_fkey"
+      columns: ["agent_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_athlete_id_fkey"
+      columns: ["athlete_id"]
+isOneToOne: false
+      referencedRelation: "athlete_overview"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_athlete_id_fkey"
+      columns: ["athlete_id"]
+isOneToOne: false
+      referencedRelation: "athletes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_visit_id_fkey"
+      columns: ["visit_id"]
+isOneToOne: false
+      referencedRelation: "visit_log"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "offline_operations_visit_id_fkey"
+      columns: ["visit_id"]
+isOneToOne: false
+      referencedRelation: "visits"
       referencedColumns: ["id"]
     }
                   ]
@@ -424,7 +512,7 @@ isOneToOne: false
                   ]
                 },"visit_log": {
                   Row: {
-                    "athlete_id": string,"corrected_at": string | null,"corrected_by": string | null,"corrected_by_name": string | null,"correction_reason": string | null,"duration_seconds": number | null,"entered_at": string,"entry_agent_id": string,"entry_agent_name": string | null,"exit_agent_id": string | null,"exit_agent_name": string | null,"exited_at": string | null,"id": string,"matricule": string,"status": Database["public"]['Enums']["visit_status"],"subscription_id": string,"visit_date": string | null
+                    "athlete_id": string,"corrected_at": string | null,"corrected_by": string | null,"corrected_by_name": string | null,"correction_reason": string | null,"duration_seconds": number | null,"entered_at": string,"entry_agent_id": string,"entry_agent_name": string | null,"entry_offline": boolean,"exit_agent_id": string | null,"exit_agent_name": string | null,"exit_offline": boolean,"exited_at": string | null,"id": string,"matricule": string,"status": Database["public"]['Enums']["visit_status"],"subscription_id": string,"visit_date": string | null
                   }
                   ComputedFields: never
                   Relationships: [
@@ -505,6 +593,9 @@ isOneToOne: false
 "admin_register_agent":
 { Args: { "p_display_name": string,"p_login_phone": string,"p_user_id": string }; Returns: undefined
                            },
+"admin_review_offline_operation":
+{ Args: { "p_id": string,"p_note": string }; Returns: undefined
+                           },
 "admin_save_plan":
 { Args: { "p_currency": string,"p_duration_days": number,"p_id": string,"p_is_active": boolean,"p_name": string,"p_price": number }; Returns: string
                            },
@@ -518,7 +609,7 @@ isOneToOne: false
 { Args: { "p_display_name": string,"p_user_id": string }; Returns: undefined
                            },
 "admin_update_settings":
-{ Args: { "p_default_currency": string,"p_expiring_soon_days": number,"p_long_visit_hours": number,"p_stadium_name": string,"p_timezone": string }; Returns: undefined
+{ Args: { "p_default_currency": string,"p_expiring_soon_days": number,"p_long_visit_hours": number,"p_offline_snapshot_hours": number,"p_stadium_name": string,"p_timezone": string }; Returns: undefined
                            },
 "app_today":
 { Args: Record<PropertyKey, never>; Returns: string
@@ -530,6 +621,9 @@ isOneToOne: false
 { Args: { "p_limit"?: number }; Returns: {
               "kind": string,"matricule": string,"occurred_at": string
             }[]
+                           },
+"control_offline_snapshot":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "control_overview":
 { Args: Record<PropertyKey, never>; Returns: Json
@@ -544,6 +638,9 @@ isOneToOne: false
                            },
 "control_record_exit":
 { Args: { "p_matricule": string }; Returns: Json
+                           },
+"control_sync_offline":
+{ Args: { "p_ops": Json }; Returns: Json
                            },
 "current_app_role":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["app_role"]

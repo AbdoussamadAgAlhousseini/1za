@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { ArrowRight, CheckCircle2, Clock3, LogIn, LogOut, RotateCcw, ScanLine, Search, Users2, AlertTriangle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, CloudOff, LogIn, LogOut, RotateCcw, ScanLine, Search, Users2, AlertTriangle } from "lucide-react";
 import { checkMatricule, loadControlPanel, recordEntry, recordExit } from "@/server/actions/control";
 import type { ControlCheck, ControlPanelData } from "@/lib/control-types";
 import type { ActionResult } from "@/lib/action-types";
 import { NETWORK_ERROR_MESSAGE } from "@/lib/domain/errors";
 import { explainMatriculeError, formatMatricule, MATRICULE_EXAMPLE, normalizeMatricule } from "@/lib/domain/matricule";
-import { formatDuration, formatTime } from "@/lib/domain/format";
+import { formatDateTime, formatDuration, formatTime } from "@/lib/domain/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
@@ -16,27 +16,35 @@ import { EmptyState, InlineAlert } from "@/components/ui/states";
 import { cn } from "@/lib/cn";
 import { VerdictPanel } from "./verdict-panel";
 import { LiveClock } from "./live-clock";
+import { useOfflineControl } from "@/lib/offline/use-offline-control";
+import { OfflineStatus, OfflineSyncPanel } from "./offline-panels";
 
 type Phase =
   | { kind: "idle" }
-  | { kind: "result"; check: ControlCheck }
-  | { kind: "done"; action: "entry" | "exit"; matricule: string; at: string; durationSeconds?: number }
+  | { kind: "result"; check: ControlCheck; offline: OfflineInfo | null }
+  | { kind: "done"; action: "entry" | "exit"; matricule: string; at: string; durationSeconds?: number; offline: boolean }
   | { kind: "error"; message: string };
 
-async function safeCall<T>(fn: () => Promise<ActionResult<T>>): Promise<ActionResult<T>> {
+interface OfflineInfo {
+  generatedAt: string;
+}
+
+async function safeCall<T>(fn: () => Promise<ActionResult<T>>): Promise<ActionResult<T> & { network?: boolean }> {
   try {
     return await fn();
   } catch {
-    return { ok: false, message: NETWORK_ERROR_MESSAGE };
+    return { ok: false, message: NETWORK_ERROR_MESSAGE, network: true };
   }
 }
 
 export function ControlStation({
   timezone,
+  agentId,
   agentName,
   initialPanel,
 }: {
   timezone: string;
+  agentId: string;
   agentName: string;
   initialPanel: ControlPanelData | null;
 }) {
@@ -48,6 +56,7 @@ export function ControlStation({
   const [pendingExit, setPendingExit] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
+  const offline = useOfflineControl(agentId);
 
   const refreshPanel = useCallback(async () => {
     const res = await safeCall(loadControlPanel);
@@ -56,7 +65,9 @@ export function ControlStation({
 
   // Rafraîchissement périodique des présents (toutes les 30 s).
   useEffect(() => {
-    const id = window.setInterval(refreshPanel, 30_000);
+    const id = window.setInterval(() => {
+      if (navigator.onLine) void refreshPanel();
+    }, 30_000);
     return () => window.clearInterval(id);
   }, [refreshPanel]);
 
@@ -73,6 +84,31 @@ export function ControlStation({
     requestAnimationFrame(() => inputRef.current?.focus());
   }, []);
 
+  /** Vérification sur l'appareil, sans réseau. */
+  const checkOffline = async (matricule: string) => {
+    offline.setOnline(false);
+    const local = await offline.verifyLocally(matricule);
+    if (!local) {
+      setPhase({
+        kind: "error",
+        message: "Pas de réseau et aucune donnée hors ligne sur cet appareil. Connectez-vous une fois à Internet pour télécharger les abonnements.",
+      });
+      return;
+    }
+    if (local.state === "expired") {
+      setPhase({
+        kind: "error",
+        message: `Données hors ligne périmées (téléchargées le ${formatDateTime(offline.snapshot?.generated_at, timezone)}). Vérification impossible : retrouvez du réseau pour les mettre à jour.`,
+      });
+      return;
+    }
+    if (local.state === "clock_error") {
+      setPhase({ kind: "error", message: "L'horloge de ce téléphone semble incorrecte. Corrigez la date et l'heure de l'appareil." });
+      return;
+    }
+    setPhase({ kind: "result", check: local.check, offline: { generatedAt: offline.snapshot?.generated_at ?? local.check.checked_at } });
+  };
+
   const submitCheck = (raw: string) => {
     const hint = explainMatriculeError(raw);
     if (hint) {
@@ -80,20 +116,43 @@ export function ControlStation({
       inputRef.current?.focus();
       return;
     }
+    const matricule = normalizeMatricule(raw);
     startChecking(async () => {
+      if (!navigator.onLine) return checkOffline(matricule);
       const res = await safeCall(() => checkMatricule(raw));
-      setPhase(res.ok ? { kind: "result", check: res.data } : { kind: "error", message: res.message });
+      if (res.ok) {
+        offline.setOnline(true);
+        setPhase({ kind: "result", check: res.data, offline: null });
+      } else if (res.network) {
+        await checkOffline(matricule);
+      } else {
+        setPhase({ kind: "error", message: res.message });
+      }
     });
   };
 
-  const doEntry = (matricule: string) => {
+  /** Enregistre l'opération dans la file locale (synchronisée au retour du réseau). */
+  const recordOffline = async (kind: "entry" | "exit", matricule: string) => {
+    const op = await offline.enqueue(kind, matricule);
+    setPhase({ kind: "done", action: kind, matricule, at: op.occurredAt, offline: true });
+    setValue("");
+    toast.success(`${kind === "entry" ? "Entrée" : "Sortie"} enregistrée hors ligne · ${formatMatricule(matricule)}`, {
+      description: "Elle sera transmise automatiquement dès le retour du réseau.",
+    });
+  };
+
+  const doEntry = (matricule: string, viaOffline: boolean) => {
     startRecording(async () => {
+      if (viaOffline || !navigator.onLine) return recordOffline("entry", matricule);
       const res = await safeCall(() => recordEntry(matricule));
       if (res.ok) {
-        setPhase({ kind: "done", action: "entry", matricule: res.data.matricule, at: res.data.entered_at });
+        setPhase({ kind: "done", action: "entry", matricule: res.data.matricule, at: res.data.entered_at, offline: false });
         setValue("");
         toast.success(`Entrée enregistrée · ${formatMatricule(res.data.matricule)}`);
         void refreshPanel();
+      } else if (res.network) {
+        // Vérifiée en ligne mais réseau perdu entre-temps : mise en file d'attente.
+        await recordOffline("entry", matricule);
       } else {
         setPhase({ kind: "error", message: res.message });
         toast.error(res.message);
@@ -101,8 +160,16 @@ export function ControlStation({
     });
   };
 
-  const doExit = (matricule: string, fromList = false) => {
+  const doExit = (matricule: string, fromList = false, viaOffline = false) => {
     startRecording(async () => {
+      if (viaOffline || !navigator.onLine) {
+        setPendingExit(null);
+        if (fromList) {
+          await offline.enqueue("exit", matricule);
+          toast.success(`Sortie enregistrée hors ligne · ${formatMatricule(matricule)}`);
+        } else await recordOffline("exit", matricule);
+        return;
+      }
       const res = await safeCall(() => recordExit(matricule));
       setPendingExit(null);
       if (res.ok) {
@@ -113,11 +180,15 @@ export function ControlStation({
             matricule: res.data.matricule,
             at: res.data.exited_at,
             durationSeconds: res.data.duration_seconds,
+            offline: false,
           });
           setValue("");
         }
         toast.success(`Sortie enregistrée · ${formatMatricule(res.data.matricule)} · ${formatDuration(res.data.duration_seconds)}`);
         void refreshPanel();
+      } else if (res.network) {
+        if (fromList) await offline.enqueue("exit", matricule);
+        else await recordOffline("exit", matricule);
       } else {
         toast.error(res.message);
         if (!fromList) setPhase({ kind: "error", message: res.message });
@@ -134,7 +205,10 @@ export function ControlStation({
           <p className="eyebrow text-gold-600">Poste de contrôle · {agentName}</p>
           <h1 className="mt-1 font-display text-[2.35rem] font-semibold uppercase leading-none tracking-[0.02em]">Contrôle d&apos;accès</h1>
         </div>
-        <LiveClock timezone={timezone} />
+        <div className="flex flex-wrap items-center gap-3">
+          <OfflineStatus online={offline.online} snapshot={offline.snapshot} pending={offline.queue.length} syncing={offline.syncing} timezone={timezone} />
+          <LiveClock timezone={timezone} />
+        </div>
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -201,8 +275,9 @@ export function ControlStation({
               check={phase.check}
               timezone={timezone}
               busy={recording}
-              onEntry={() => doEntry(phase.check.matricule)}
-              onExit={() => doExit(phase.check.matricule)}
+              offlineSince={phase.offline?.generatedAt ?? null}
+              onEntry={() => doEntry(phase.check.matricule, phase.offline !== null)}
+              onExit={() => doExit(phase.check.matricule, false, phase.offline !== null)}
             />
           ) : null}
 
@@ -216,6 +291,12 @@ export function ControlStation({
                   <p className="font-display text-4xl font-bold uppercase leading-none text-success-700">
                     {phase.action === "entry" ? "Entrée enregistrée" : "Sortie enregistrée"}
                   </p>
+                  {phase.offline ? (
+                    <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-warning-100 px-2.5 py-0.5 text-xs font-semibold text-warning-700">
+                      <CloudOff className="size-3.5" aria-hidden="true" />
+                      Hors ligne · sera transmise au retour du réseau
+                    </p>
+                  ) : null}
                   <p className="mt-2 text-[15px] text-ink-soft">
                     <span className="font-display text-xl font-semibold tracking-[0.08em] text-ink">{formatMatricule(phase.matricule)}</span>
                     {" · "}à {formatTime(phase.at, timezone)}
@@ -244,6 +325,20 @@ export function ControlStation({
         </div>
 
         <aside className="min-w-0 space-y-5">
+          <OfflineSyncPanel
+            online={offline.online}
+            queue={offline.queue}
+            issues={offline.issues}
+            syncing={offline.syncing}
+            timezone={timezone}
+            onSync={() => void offline.sync()}
+            onDismissIssues={() => void offline.dismissIssues()}
+          />
+          {!offline.online ? (
+            <InlineAlert tone="warning" icon={<CloudOff />}>
+              Hors ligne : les compteurs et les listes ci-dessous sont figés à la dernière connexion. Les vérifications restent possibles.
+            </InlineAlert>
+          ) : null}
           <div className="overflow-hidden rounded-lg border border-pitch-800 bg-pitch-800 text-white shadow-raised">
             <div className="flex items-end justify-between gap-4 px-5 pb-4 pt-4">
               <div>

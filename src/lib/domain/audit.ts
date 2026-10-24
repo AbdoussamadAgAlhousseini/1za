@@ -22,6 +22,8 @@ export const AUDIT_ACTIONS: Record<string, { label: string; tone: Tone }> = {
   "plan.updated": { label: "Formule modifiée", tone: "info" },
   "settings.updated": { label: "Paramètres modifiés", tone: "warning" },
   "export.generated": { label: "Export de données", tone: "neutral" },
+  "offline.synced": { label: "Synchronisation hors ligne", tone: "info" },
+  "offline.reviewed": { label: "Opération hors ligne vérifiée", tone: "neutral" },
 };
 
 const STATE_LABELS: Record<string, string> = { active: "actif", suspended: "suspendu", cancelled: "annulé" };
@@ -52,6 +54,10 @@ export function describeAuditDetails(action: string, details: Record<string, unk
       const params = (d.params ?? {}) as Record<string, unknown>;
       return `${s("kind")} · du ${formatDate(String(params.from ?? ""))} au ${formatDate(String(params.to ?? ""))}`;
     }
+    case "offline.synced":
+      return `${s("applied")} appliquée(s) · ${s("to_review")} à vérifier`;
+    case "offline.reviewed":
+      return `Note : ${s("note")}`;
     case "settings.updated":
       return "Voir le détail avant / après";
     default:

@@ -39,6 +39,7 @@ abonnements et des paiements, statistiques et rapports pour l'administration.
 |---|---|
 | **Connexion** | Agents : numéro de téléphone + mot de passe. Administrateur : mot de passe seul. Page « Mon compte » pour modifier son mot de passe. |
 | **Contrôle d'accès** (agents et administrateur) | Saisie du matricule, verdict immédiat (autorisé, expiré, pas encore valide, suspendu, sans abonnement, inconnu, déjà à l'intérieur), enregistrement de l'entrée ou de la sortie en un geste (touche Entrée), liste des présents, opérations du jour de l'agent. |
+| **Mode hors ligne** (agents) | Sans réseau, la vérification se fait sur le téléphone à partir d'une copie des abonnements téléchargée automatiquement (matricules hachés), les entrées et sorties sont mises en file d'attente puis transmises au retour du réseau. Le serveur revalide tout ; les opérations non conformes sont signalées à l'administrateur. Voir [docs/HORS-LIGNE.md](docs/HORS-LIGNE.md). |
 | **Tableau de bord** | Activité du jour (entrées, sportifs uniques, présents, visites terminées), fréquentation sur 30 jours, répartition des statuts d'abonnement, renouvellements à prévoir, expirations récentes, ventes du mois, derniers passages. |
 | **Sportifs** | Enregistrement par matricule (validation et détection des doublons), premier abonnement et paiement en une seule étape, recherche, filtres (statut, période d'inscription), tri, pagination serveur, fiche de suivi (indicateurs, graphique 60 jours, historique des abonnements, paiements, passages). |
 | **Abonnements** | Formules configurables, création, renouvellement (historique conservé), suspension / réactivation / annulation motivées, vue « À renouveler », liste filtrable. |
@@ -223,6 +224,7 @@ Variables d'environnement :
 - [docs/SECURITE.md](docs/SECURITE.md) — rôles, RLS, fonctions, confidentialité, en-têtes, journalisation
 - [docs/STATISTIQUES.md](docs/STATISTIQUES.md) — définitions et règles de calcul
 - [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) — Supabase, Vercel, premier administrateur, PWA
+- [docs/HORS-LIGNE.md](docs/HORS-LIGNE.md) — fonctionnement du contrôle sans réseau
 - [docs/EXPLOITATION.md](docs/EXPLOITATION.md) — doublons de matricules, récupération des accès, sauvegardes, maintenance
 - [public/brand/LISEZMOI.md](public/brand/LISEZMOI.md) — intégration du logo officiel
 
@@ -232,19 +234,23 @@ Variables d'environnement :
 
 1. **Identité visuelle provisoire** : aucun logo ni charte officiels n'ont été
    fournis (monogramme « 26 » provisoire, clairement signalé).
-2. **Collisions de matricules** : la règle (initiales + 5 chiffres du téléphone)
-   peut produire le même matricule pour deux personnes. L'application refuse le
-   doublon sans rien créer ; une **décision métier** est nécessaire pour définir
-   une règle de différenciation (voir [docs/EXPLOITATION.md](docs/EXPLOITATION.md)).
+2. **Collisions de matricules** : la règle validée (initiales + 5 premiers
+   chiffres du téléphone) peut produire le même matricule pour deux personnes.
+   L'application refuse le doublon sans rien créer ; la procédure est décrite dans
+   [docs/EXPLOITATION.md](docs/EXPLOITATION.md).
 3. **Pseudonymisation, pas anonymisation** : le matricule et l'historique de
    fréquentation restent des données personnelles indirectes ; ils sont protégés
    comme tels mais ne sont pas anonymes.
 4. **Mot de passe oublié** : pas d'e-mail ni de SMS. Un agent demande une
    réinitialisation à l'administrateur ; l'administrateur utilise
    `npm run admin:reset-password` (accès à la clé service_role requis).
-5. **Connexion Internet requise** : pas de mode hors ligne pour le contrôle
-   (choix volontaire : la validité est toujours vérifiée en temps réel et aucune
-   donnée n'est conservée sur les téléphones).
+5. **Mode hors ligne** : limité au poste de contrôle (les pages d'administration
+   exigent le réseau). Hors ligne, la vérification repose sur une copie des
+   abonnements datant au plus de 24 h (paramétrable) et sur l'heure du téléphone ;
+   les opérations sont revalidées par le serveur à la synchronisation. Les
+   matricules de la copie sont hachés, mais un hachage de matricule reste
+   théoriquement réversible par force brute : la copie est effacée à la
+   déconnexion. Le téléphone doit s'être connecté au moins une fois au réseau.
 6. **Paiements** : enregistrement manuel uniquement ; aucune intégration bancaire
    ou mobile money.
 7. **Politique CSP** : `script-src 'unsafe-inline'` est nécessaire au rendu de
@@ -272,7 +278,6 @@ Ces étapes nécessitent vos comptes et ne peuvent pas être faites à votre pla
 5. **Créer les formules d'abonnement** réelles (Paramètres) et **les comptes des
    agents** (Personnel).
 6. **Fournir le logo officiel** si disponible.
-7. **Décider de la règle de résolution des doublons de matricules.**
-8. **Choisir l'offre Supabase** adaptée aux sauvegardes souhaitées.
-9. **Installer l'application** sur l'ordinateur de l'administrateur et les
+7. **Choisir l'offre Supabase** adaptée aux sauvegardes souhaitées.
+8. **Installer l'application** sur l'ordinateur de l'administrateur et les
    téléphones des agents (voir guide).

@@ -29,6 +29,7 @@ export default async function SettingsPage() {
                 expiringSoonDays: settings?.expiring_soon_days ?? 7,
                 longVisitHours: settings?.long_visit_hours ?? 6,
                 defaultCurrency: currency,
+                offlineSnapshotHours: settings?.offline_snapshot_hours ?? 24,
               }}
             />
           </CardBody>

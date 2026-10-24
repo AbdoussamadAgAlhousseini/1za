@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { AlertCircle, Ban, Clock3, Footprints, LogOut, Wrench } from "lucide-react";
+import { AlertCircle, Ban, Clock3, CloudOff, Footprints, LogOut, Wrench } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { VisitStatusBadge } from "@/components/ui/badge";
+import { Badge, VisitStatusBadge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { EmptyState, InlineAlert } from "@/components/ui/states";
@@ -111,7 +111,14 @@ export function VisitsTable({
                       <Td className="tabular">{v.exited_at ? formatTime(v.exited_at, timezone) : <span className="text-ink-faint">—</span>}</Td>
                       <Td className="tabular whitespace-nowrap">{formatDuration(v.duration_seconds)}</Td>
                       <Td>
-                        <VisitStatusBadge status={v.status ?? "open"} corrected={Boolean(v.corrected_at)} />
+                        <span className="flex flex-wrap items-center gap-1.5">
+                          <VisitStatusBadge status={v.status ?? "open"} corrected={Boolean(v.corrected_at)} />
+                          {v.entry_offline || v.exit_offline ? (
+                            <Badge tone="neutral" icon={<CloudOff aria-hidden="true" />}>
+                              Hors ligne
+                            </Badge>
+                          ) : null}
+                        </span>
                         {v.correction_reason ? (
                           <span className="mt-1 block max-w-56 truncate text-xs text-ink-muted" title={v.correction_reason}>
                             {v.correction_reason}

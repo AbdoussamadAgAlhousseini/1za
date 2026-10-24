@@ -17,10 +17,16 @@ export interface SettingsValues {
   expiringSoonDays: number;
   longVisitHours: number;
   defaultCurrency: string;
+  offlineSnapshotHours: number;
 }
 
 export function SettingsForm({ initial }: { initial: SettingsValues }) {
-  const [v, setV] = useState({ ...initial, expiringSoonDays: String(initial.expiringSoonDays), longVisitHours: String(initial.longVisitHours) });
+  const [v, setV] = useState({
+    ...initial,
+    expiringSoonDays: String(initial.expiringSoonDays),
+    longVisitHours: String(initial.longVisitHours),
+    offlineSnapshotHours: String(initial.offlineSnapshotHours),
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -70,6 +76,14 @@ export function SettingsForm({ initial }: { initial: SettingsValues }) {
         </Field>
         <Field label="Entrée ouverte anormalement longue (heures)" error={errors.longVisitHours} hint="Au-delà, l'entrée est signalée pour vérification.">
           {(p) => <Input {...p} type="number" min={1} max={24} value={v.longVisitHours} onChange={(e) => set({ longVisitHours: e.target.value })} className="h-11 w-28" />}
+        </Field>
+        <Field
+          label="Validité des données hors ligne (heures)"
+          error={errors.offlineSnapshotHours}
+          hint="Durée pendant laquelle un téléphone d'agent peut contrôler sans réseau avec les données téléchargées."
+          className="sm:col-span-2"
+        >
+          {(p) => <Input {...p} type="number" min={1} max={72} value={v.offlineSnapshotHours} onChange={(e) => set({ offlineSnapshotHours: e.target.value })} className="h-11 w-28" />}
         </Field>
       </div>
       <Button type="submit" loading={pending}>

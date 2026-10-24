@@ -5,6 +5,7 @@ import { listVisits } from "@/server/actions/lists";
 import { uuidSchema } from "@/lib/validation/common";
 import { PageHeader } from "@/components/ui/page-header";
 import { VisitsTable } from "@/components/visits/visits-table";
+import { OfflineReview, type OfflineIssueRow } from "@/components/visits/offline-review";
 
 export const metadata: Metadata = { title: "Fréquentation" };
 
@@ -17,10 +18,17 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
   const initialFilters = { search: "", athleteId, status, agentId: "", from: "", to: "", page: 1 };
 
   const supabase = await createClient();
-  const [initial, { data: agents }, athlete] = await Promise.all([
+  const [initial, { data: agents }, athlete, { data: offlineIssues }] = await Promise.all([
     listVisits(initialFilters),
     supabase.from("profiles").select("id, display_name").order("display_name"),
     athleteId ? supabase.from("athletes").select("matricule").eq("id", athleteId).maybeSingle() : Promise.resolve({ data: null }),
+    supabase
+      .from("offline_operation_log")
+      .select("id, kind, occurred_at, received_at, result, reason_code, athlete_id, matricule, agent_name")
+      .neq("result", "applied")
+      .is("reviewed_at", null)
+      .order("received_at", { ascending: false })
+      .limit(100),
   ]);
 
   return (
@@ -30,6 +38,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
         title="Fréquentation"
         description="Historique des entrées et sorties, horodatées par le serveur. Les corrections exceptionnelles exigent un motif et sont journalisées."
       />
+      <OfflineReview rows={(offlineIssues ?? []) as OfflineIssueRow[]} timezone={staff.timezone} />
       <VisitsTable
         initial={initial.ok ? initial.data : null}
         initialFilters={initialFilters}

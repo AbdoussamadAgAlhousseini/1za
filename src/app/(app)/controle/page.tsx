@@ -12,6 +12,7 @@ export default async function ControlPage() {
   return (
     <ControlStation
       timezone={staff.timezone}
+      agentId={staff.userId}
       agentName={staff.displayName}
       initialPanel={panel.ok ? panel.data : null}
     />

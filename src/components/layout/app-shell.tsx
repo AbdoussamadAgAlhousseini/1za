@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { LogOut, Menu, X } from "lucide-react";
 import { BrandLockup, BrandMark, TrackLines } from "@/components/brand/brand";
@@ -11,6 +11,8 @@ import { ROLE_LABELS, type AppRole } from "@/lib/domain/status";
 import { signOut } from "@/server/actions/auth";
 import { navigationFor } from "./navigation";
 import { InstallAppButton } from "@/components/pwa/install-app-card";
+import { clearDeviceData } from "@/components/pwa/service-worker";
+import { toast } from "sonner";
 
 interface ShellUser {
   displayName: string;
@@ -69,6 +71,44 @@ function NavLinks({ role, onNavigate }: { role: AppRole; onNavigate?: () => void
   );
 }
 
+/**
+ * Déconnexion : refusée tant que des opérations hors ligne n'ont pas été
+ * transmises (elles seraient perdues), puis effacement des données de l'appareil.
+ */
+function LogoutButton() {
+  const [pending, startTransition] = useTransition();
+  const onClick = () =>
+    startTransition(async () => {
+      let waiting = 0;
+      try {
+        const { offlineStore } = await import("@/lib/offline/store");
+        waiting = await offlineStore.pendingCount();
+      } catch {
+        waiting = 0;
+      }
+      if (waiting > 0) {
+        toast.error(`${waiting} opération(s) hors ligne ne sont pas encore transmises.`, {
+          description: "Retrouvez du réseau et ouvrez le contrôle d'accès : elles seront envoyées automatiquement. Déconnectez-vous ensuite.",
+        });
+        return;
+      }
+      await clearDeviceData();
+      await signOut();
+    });
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={pending}
+      className="grid size-9 place-items-center rounded-md text-pitch-200 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+      aria-label="Se déconnecter"
+      title="Se déconnecter"
+    >
+      <LogOut className="size-[18px]" aria-hidden="true" />
+    </button>
+  );
+}
+
 function UserPanel({ user }: { user: ShellUser }) {
   return (
     <div className="flex items-center gap-3 rounded-lg bg-white/[0.06] p-2.5 ring-1 ring-white/10">
@@ -79,16 +119,7 @@ function UserPanel({ user }: { user: ShellUser }) {
         <p className="truncate text-sm font-semibold text-white">{user.displayName}</p>
         <p className="truncate text-xs text-pitch-200">{ROLE_LABELS[user.role]}</p>
       </div>
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="grid size-9 place-items-center rounded-md text-pitch-200 transition-colors hover:bg-white/10 hover:text-white"
-          aria-label="Se déconnecter"
-          title="Se déconnecter"
-        >
-          <LogOut className="size-[18px]" aria-hidden="true" />
-        </button>
-      </form>
+      <LogoutButton />
     </div>
   );
 }

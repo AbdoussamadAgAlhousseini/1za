@@ -10,7 +10,7 @@ export async function getDashboardData() {
   const stats = statsRaw as unknown as DashboardStats;
   const today = stats.today;
 
-  const [attendance, expiring, expired, recent] = await Promise.all([
+  const [attendance, expiring, expired, recent, offlineIssues] = await Promise.all([
     supabase.rpc("stats_attendance", { p_from: addDays(today, -29), p_to: today, p_granularity: "day" }),
     supabase
       .from("athlete_overview")
@@ -31,6 +31,7 @@ export async function getDashboardData() {
       .neq("status", "cancelled")
       .order("entered_at", { ascending: false })
       .limit(8),
+    supabase.from("offline_operations").select("id", { count: "exact", head: true }).neq("result", "applied").is("reviewed_at", null),
   ]);
 
   return {
@@ -39,5 +40,6 @@ export async function getDashboardData() {
     expiring: expiring.data ?? [],
     expired: expired.data ?? [],
     recent: recent.data ?? [],
+    offlineIssues: offlineIssues.count ?? 0,
   };
 }

@@ -116,12 +116,24 @@ aucun outil d'analyse ou de suivi.
   - la journalisation des arguments des actions serveur est désactivée
     (`logging.serverFunctions: false`) et les erreurs serveur ne journalisent
     qu'un code ;
-  - le service worker ne met en cache **aucune** page authentifiée ni donnée.
+  - le service worker ne met en cache que la page du poste de contrôle (pour le
+    mode hors ligne) ; ce cache est vidé à la déconnexion.
 - Les exports sont réservés à l'administrateur, limités, journalisés et ne
   contiennent que les colonnes utiles. Ils doivent être conservés dans un
   emplacement protégé.
 
-## 8. Signaler / corriger une faille
+## 8. Mode hors ligne
+
+| Risque | Mesure |
+|---|---|
+| Données sur le téléphone | Copie limitée aux abonnements utiles (valides, à venir, expirés depuis moins de 60 jours) ; matricules **hachés** (SHA-256 avec sel aléatoire par copie) ; aucune autre donnée. Un hachage de matricule à 7 caractères reste réversible par force brute : la copie n'est pas « anonyme ». Elle expire (24 h par défaut) et est effacée à la déconnexion. |
+| File d'attente | Contient les matricules saisis hors ligne jusqu'à leur transmission ; déconnexion bloquée tant qu'elle n'est pas vide (pas de perte). |
+| Heure de l'appareil | Hors ligne, l'horodatage vient du téléphone (inévitable). Le serveur refuse les heures futures et les opérations de plus de 72 h ; les passages sont marqués « Hors ligne » dans l'historique ; une horloge antérieure à la copie bloque la vérification. |
+| Règles contournées hors ligne | Le serveur revalide chaque opération (abonnement à la date de l'entrée, chevauchements, sortie sans entrée). Les opérations non conformes ne sont pas appliquées et sont présentées à l'administrateur. |
+| Double envoi | Identifiant unique par opération : idempotence garantie ; une opération d'un autre agent est refusée. |
+| Téléphone perdu | Révoquer l'agent (page Personnel) : plus aucune synchronisation possible ; la copie locale expire d'elle-même. |
+
+## 9. Signaler / corriger une faille
 
 Mettre à jour les dépendances régulièrement (`npm audit`, `npm outdated`) et
 relancer l'ensemble des tests avant tout déploiement.

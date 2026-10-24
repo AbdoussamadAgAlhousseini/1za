@@ -26,6 +26,7 @@
 | Filtres et recherches par actions serveur (POST) | Pas de matricule dans les URL ni les journaux d'accès. |
 | Identifiants de connexion techniques `.invalid` | Connexion téléphone / mot de passe seul sans fournisseur SMS ni e-mail. |
 | PWA plutôt qu'extension Chrome | Mécanisme standard d'installation « comme une application » sur ordinateur et téléphone. |
+| Hors ligne « à la LAKOL » | Service worker réseau-d'abord pour la page de contrôle, scripts signalés par la page, file d'opérations à identifiant unique (IndexedDB) renvoyée au retour du réseau ; en plus : vérification locale sur instantané haché et revalidation serveur. |
 | Polices auto-hébergées (Fontsource) | Aucune requête vers un tiers (confidentialité, CSP stricte). |
 | Recharts pour les graphiques | Composable avec React, accessible (vue tableau proposée). |
 
@@ -53,6 +54,8 @@ Migrations (ordre d'application) :
 | `…0600_overview_plan.sql` | Formule de référence dans `athlete_overview` |
 | `…0700_period_summary.sql` | Synthèse de période (rapports) |
 | `…0800_audit_target.sql` | Nom du membre du personnel concerné dans le journal |
+| `…0900_offline_mode.sql` | Mode hors ligne : instantané haché, synchronisation idempotente, opérations à vérifier |
+| `…1000_visit_log_offline.sql` | Indicateurs « hors ligne » dans l'historique des passages |
 
 ## Système de design
 

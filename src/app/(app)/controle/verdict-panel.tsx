@@ -1,11 +1,11 @@
 "use client";
 
 import { forwardRef } from "react";
-import { CheckCircle2, CircleSlash, DoorOpen, LogIn, LogOut, SearchX, ShieldAlert, ShieldX } from "lucide-react";
+import { CheckCircle2, CircleSlash, CloudOff, DoorOpen, LogIn, LogOut, SearchX, ShieldAlert, ShieldX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { CONTROL_PRESENTATION, type Tone } from "@/lib/domain/status";
-import { formatDate, formatDuration, formatRelativeDays, formatTime } from "@/lib/domain/format";
+import { formatDate, formatDateTime, formatDuration, formatRelativeDays, formatTime } from "@/lib/domain/format";
 import { formatMatricule } from "@/lib/domain/matricule";
 import type { ControlCheck } from "@/lib/control-types";
 
@@ -31,13 +31,15 @@ const OUTCOME_ICONS = {
 interface Props {
   check: ControlCheck;
   timezone: string;
+  /** Renseigné quand la vérification a été faite sans réseau (date des données). */
+  offlineSince?: string | null;
   busy: boolean;
   onEntry: () => void;
   onExit: () => void;
 }
 
 export const VerdictPanel = forwardRef<HTMLButtonElement, Props>(function VerdictPanel(
-  { check, timezone, busy, onEntry, onExit },
+  { check, timezone, offlineSince, busy, onEntry, onExit },
   actionRef,
 ) {
   const p = CONTROL_PRESENTATION[check.outcome];
@@ -54,7 +56,14 @@ export const VerdictPanel = forwardRef<HTMLButtonElement, Props>(function Verdic
       aria-atomic="true"
       className={cn("animate-pop-in overflow-hidden rounded-xl border-2", tones.panel)}
       data-outcome={check.outcome}
+      data-offline={offlineSince ? "true" : undefined}
     >
+      {offlineSince ? (
+        <div className="flex items-center gap-2 bg-warning-100 px-5 py-2 text-[13px] font-semibold text-warning-700 sm:px-7">
+          <CloudOff className="size-4 shrink-0" aria-hidden="true" />
+          Vérification hors ligne · abonnements téléchargés le {formatDateTime(offlineSince, timezone)}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-7">
         <div className={cn("grid size-16 shrink-0 place-items-center rounded-2xl shadow-raised sm:size-20", tones.icon)}>
           <Icon className="size-9 sm:size-11" strokeWidth={2.2} aria-hidden="true" />
@@ -63,7 +72,11 @@ export const VerdictPanel = forwardRef<HTMLButtonElement, Props>(function Verdic
           <p className={cn("font-display text-[2.4rem] font-bold uppercase leading-none tracking-[0.01em] sm:text-5xl", tones.headline)}>
             {p.headline}
           </p>
-          <p className="mt-2 text-[15px] font-medium text-ink-soft">{p.message}</p>
+          <p className="mt-2 text-[15px] font-medium text-ink-soft">
+            {offlineSince && check.outcome === "no_subscription"
+              ? "Aucun abonnement valide connu pour ce matricule dans les données hors ligne (ou matricule inconnu). Entrée refusée."
+              : p.message}
+          </p>
         </div>
       </div>
 

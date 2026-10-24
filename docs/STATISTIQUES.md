@@ -12,6 +12,10 @@ enregistrées (fonctions `stats_*`), jamais simulées ni calculées dans le navi
 - Un passage est rattaché à la **date locale de son entrée** (une visite entamée
   à 23 h 30 et terminée à 0 h 30 compte pour le jour de l'entrée).
 
+Les passages enregistrés **hors ligne** comptent comme les autres, à l'heure
+saisie sur le téléphone, une fois synchronisés et validés par le serveur. Les
+opérations hors ligne refusées par le serveur ne comptent pas.
+
 ## Définitions
 
 | Indicateur | Définition |

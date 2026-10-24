@@ -43,3 +43,36 @@ test("matricule inconnu et format invalide", async ({ page }) => {
   await input.press("Enter");
   await expect(page.getByText("Vérification impossible")).toBeVisible();
 });
+
+test("hors ligne : vérification sur l'appareil, file d'attente, synchronisation au retour du réseau", async ({ browser }) => {
+  const adminPage = await (await browser.newContext()).newPage();
+  await loginAsAdmin(adminPage);
+  await adminPage.goto("/sportifs?nouveau=1");
+  const matricule = randomMatricule();
+  await adminPage.getByLabel("Matricule", { exact: true }).fill(matricule);
+  await adminPage.getByRole("button", { name: "Enregistrer le sportif" }).click();
+  await expect(adminPage).toHaveURL(/\/sportifs\/[0-9a-f-]{36}$/);
+  const athleteUrl = adminPage.url();
+
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await loginAsAgent(page);
+  await expect(page.getByText("Hors ligne prêt")).toBeVisible({ timeout: 20_000 });
+
+  await context.setOffline(true);
+  const input = page.getByLabel("Matricule du sportif");
+  await input.fill(matricule);
+  await input.press("Enter");
+  await expect(page.locator("[data-offline=true][data-outcome=authorized]")).toBeVisible();
+  await page.getByRole("button", { name: "Enregistrer l'entrée" }).click();
+  await expect(page.getByText("sera transmise au retour du réseau")).toBeVisible();
+  await expect(page.getByText("1 opération(s) en attente")).toBeVisible();
+
+  await context.setOffline(false);
+  await expect(page.getByText("1 opération(s) en attente")).toHaveCount(0, { timeout: 30_000 });
+
+  await adminPage.goto(athleteUrl);
+  await expect(adminPage.getByText("En cours").first()).toBeVisible();
+  await adminPage.goto("/frequentation");
+  await expect(adminPage.getByText("Hors ligne").first()).toBeVisible();
+});
