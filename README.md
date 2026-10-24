@@ -191,9 +191,9 @@ Commandes utiles :
 
 | Suite | Contenu | Commande |
 |---|---|---|
-| Unitaires (47) | Matricules, numéros de téléphone, périodes et dates de fin, durées, formats, fuseaux horaires, CSV (injection de formules), politique et génération de mots de passe, traduction des erreurs | `npm run test:unit` |
-| Base de données (66) | Exécutés **contre Supabase local** par appels directs à l'API : RLS et autorisations de chaque rôle (anon, agent, compte sans profil, agent désactivé), validation et doublons de matricules, validité des abonnements, chevauchements, renouvellements, états, paiements, entrées / sorties, **doubles entrées simultanées**, doubles sorties, sorties sans entrée, corrections, immutabilité (matricule, horodatages, journal), statistiques, limitation de débit, comptes par téléphone | `npm run test:db` |
-| Bout en bout (12) | Connexion des deux rôles, refus d'accès agent (pages et export direct), parcours complet enregistrement → entrée → refus de double entrée → sortie (ordinateur **et** téléphone), toutes les pages d'administration, export CSV journalisé, absence de matricule dans les URL | `npm run e2e` |
+| Unitaires (56) | Matricules, numéros de téléphone, vérification hors ligne (dont parité du hachage avec PostgreSQL), périodes et dates de fin, durées, formats, fuseaux horaires, CSV (injection de formules), politique et génération de mots de passe, traduction des erreurs | `npm run test:unit` |
+| Base de données (74) | Exécutés **contre Supabase local** par appels directs à l'API : RLS et autorisations de chaque rôle (anon, agent, compte sans profil, agent désactivé), validation et doublons de matricules, validité des abonnements, chevauchements, renouvellements, états, paiements, entrées / sorties, **doubles entrées simultanées**, doubles sorties, sorties sans entrée, corrections, immutabilité (matricule, horodatages, journal), statistiques, limitation de débit, comptes par téléphone, instantané hors ligne et synchronisation (idempotence, conflits, revue) | `npm run test:db` |
+| Bout en bout (14) | Connexion des deux rôles, contrôle hors ligne puis synchronisation, refus d'accès agent (pages et export direct), parcours complet enregistrement → entrée → refus de double entrée → sortie (ordinateur **et** téléphone), toutes les pages d'administration, export CSV journalisé, absence de matricule dans les URL | `npm run e2e` |
 
 Les tests base de données et de bout en bout nécessitent `npx supabase start`
 (et `npm run seed:dev` pour les tests de bout en bout). Ils refusent de
