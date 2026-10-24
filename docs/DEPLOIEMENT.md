@@ -8,8 +8,9 @@ Toutes les valeurs secrètes restent dans Supabase et Vercel : **rien n'est à
 
 1. Vercel → importer le dépôt → **Supabase → Add** (« Create New Supabase Account »
    si vous n'avez pas de compte) → région Paris si proposée → **Deploy**.
-   L'intégration renseigne automatiquement l'URL et les clés Supabase (les deux
-   formats de noms de clés sont acceptés par l'application).
+   L'intégration renseigne automatiquement l'URL et les clés Supabase
+   (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`…) : ces noms
+   sont acceptés tels quels. **Laisser le champ « Custom Prefix » vide.**
 2. Vercel → Settings → Environment Variables : ajouter
    `NEXT_PUBLIC_SITE_URL` = l'adresse publique (ex. `https://stade26.ajasahel.org`), puis **Redeploy**.
 3. Ouvrir Supabase (bouton « Open in Supabase ») → **SQL Editor** → New query →

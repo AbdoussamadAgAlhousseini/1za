@@ -15,14 +15,19 @@ let cached: z.infer<typeof publicEnvSchema> | null = null;
 export function publicEnv() {
   if (!cached) {
     const parsed = publicEnvSchema.safeParse({
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      // L'intégration Supabase de Vercel peut fournir la clé publique sous l'un ou l'autre nom.
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      // Noms classiques ou noms créés par l'intégration Supabase de Vercel. Ces
+      // valeurs ne sont lues que côté serveur : le navigateur ne contacte jamais Supabase.
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.SUPABASE_ANON_KEY ||
+        process.env.SUPABASE_PUBLISHABLE_KEY,
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || undefined,
     });
     if (!parsed.success) {
       throw new Error(
-        "Configuration Supabase manquante ou invalide : renseignez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY (voir .env.example).",
+        "Configuration Supabase manquante ou invalide : renseignez NEXT_PUBLIC_SUPABASE_URL (ou SUPABASE_URL) et NEXT_PUBLIC_SUPABASE_ANON_KEY (ou SUPABASE_ANON_KEY), voir .env.example.",
       );
     }
     cached = parsed.data;
