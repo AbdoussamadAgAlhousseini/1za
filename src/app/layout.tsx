@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   applicationName: "Stade 26 Mars",
   appleWebApp: { capable: true, title: "Stade 26 Mars", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
-  referrer: "no-referrer",
+  referrer: "same-origin",
 };
 
 export const viewport: Viewport = {

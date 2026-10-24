@@ -78,7 +78,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <CardHeader eyebrow="Fréquentation" title="60 derniers jours" description="Nombre de visites par jour" />
             <CardBody className="pt-5">
@@ -130,7 +130,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {current ? (
             <Card className="border-pitch-200 bg-pitch-50/40">
               <CardBody>

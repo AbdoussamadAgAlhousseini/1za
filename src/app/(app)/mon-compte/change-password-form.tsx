@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { AlertCircle, Check, CheckCircle2, KeyRound } from "lucide-react";
 import { changeOwnPassword } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,13 @@ import { InlineAlert } from "@/components/ui/states";
 import { cn } from "@/lib/cn";
 
 export function ChangePasswordForm({ minLength }: { minLength: number }) {
-  const [state, action, pending] = useActionState(changeOwnPassword, null);
   const [value, setValue] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+  const [state, action, pending] = useActionState(async (prev: Awaited<ReturnType<typeof changeOwnPassword>> | null, formData: FormData) => {
+    const result = await changeOwnPassword(prev, formData);
+    if (result.ok) setValue("");
+    return result;
+  }, null);
   const errors = state && !state.ok ? state.fieldErrors : undefined;
 
   const rules = [
@@ -20,13 +24,6 @@ export function ChangePasswordForm({ minLength }: { minLength: number }) {
     { label: "Une lettre majuscule", ok: /[A-Z]/.test(value) },
     { label: "Un chiffre", ok: /[0-9]/.test(value) },
   ];
-
-  useEffect(() => {
-    if (state?.ok) {
-      formRef.current?.reset();
-      setValue("");
-    }
-  }, [state]);
 
   return (
     <form ref={formRef} action={action} className="space-y-5" noValidate>

@@ -89,10 +89,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       {/* Aujourd'hui */}
       <section aria-labelledby="today-title" className="mb-6 overflow-hidden rounded-xl bg-pitch-900 text-white shadow-raised">
-        <div className="grid gap-px bg-white/10 lg:grid-cols-[1.25fr_repeat(3,1fr)]">
-          <div className="bg-pitch-900 px-6 py-6 sm:px-7">
+        <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-[1.25fr_repeat(3,1fr)]">
+          <div className="col-span-2 bg-pitch-900 px-5 py-5 sm:px-7 sm:py-6 lg:col-span-1">
             <p id="today-title" className="eyebrow text-gold-300">Aujourd&apos;hui</p>
-            <p className="mt-3 text-[3.5rem] font-semibold leading-none tracking-[-0.02em]">{formatNumber(stats.entries_today)}</p>
+            <p className="mt-2 text-5xl font-semibold leading-none tracking-[-0.02em] sm:mt-3 sm:text-[3.5rem]">{formatNumber(stats.entries_today)}</p>
             <p className="mt-2 text-sm text-pitch-100">
               entrée{stats.entries_today > 1 ? "s" : ""} enregistrée{stats.entries_today > 1 ? "s" : ""}
             </p>
@@ -102,12 +102,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             { label: "Présents maintenant", value: stats.present_now, hint: "entrées sans sortie", icon: DoorOpen },
             { label: "Visites terminées", value: stats.completed_today, hint: "avec sortie enregistrée", icon: CheckCircle2 },
           ].map(({ label, value, hint, icon: Icon }) => (
-            <div key={label} className="bg-pitch-900 px-6 py-6">
+            <div key={label} className="bg-pitch-900 px-5 py-4 last:col-span-2 sm:px-6 sm:py-6 lg:last:col-span-1">
               <p className="flex items-center gap-1.5 text-[13px] font-medium text-pitch-200">
                 <Icon className="size-4 text-pitch-300" aria-hidden="true" />
                 {label}
               </p>
-              <p className="mt-3 text-4xl font-semibold leading-none">{formatNumber(value)}</p>
+              <p className="mt-2 text-3xl font-semibold leading-none sm:mt-3 sm:text-4xl">{formatNumber(value)}</p>
               <p className="mt-2 text-xs text-pitch-300">{hint}</p>
             </div>
           ))}

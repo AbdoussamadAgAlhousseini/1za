@@ -20,7 +20,7 @@ export default async function AccountPage() {
     <>
       <PageHeader eyebrow="Compte" title="Mon compte" description="Vos informations de connexion et la sécurité de votre accès." />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <CardHeader title="Identité" />
             <CardBody>

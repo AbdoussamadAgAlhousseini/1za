@@ -128,7 +128,7 @@ export function ControlStation({
   const overview = panel?.overview;
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="eyebrow text-gold-600">Poste de contrôle · {agentName}</p>
@@ -138,7 +138,7 @@ export function ControlStation({
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <Card className="overflow-hidden">
             <form
               className="p-5 sm:p-7"
@@ -243,7 +243,7 @@ export function ControlStation({
           ) : null}
         </div>
 
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <div className="overflow-hidden rounded-lg border border-pitch-800 bg-pitch-800 text-white shadow-raised">
             <div className="flex items-end justify-between gap-4 px-5 pb-4 pt-4">
               <div>

@@ -87,7 +87,6 @@ export function AttendanceChart({
   height?: number;
   showUnique?: boolean;
 }) {
-  const tickInterval = data.length > 16 ? Math.ceil(data.length / 8) - 1 : 0;
   return (
     <div style={{ height }} className="w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -96,7 +95,8 @@ export function AttendanceChart({
           <XAxis
             dataKey="bucket"
             tickFormatter={(v: string) => bucketLabel(v, granularity).replace("Sem. du ", "")}
-            interval={tickInterval}
+            interval="preserveStartEnd"
+            minTickGap={18}
             tickLine={false}
             axisLine={{ stroke: "var(--color-line-strong)" }}
             tick={{ fill: "var(--color-ink-muted)", fontSize: 12 }}

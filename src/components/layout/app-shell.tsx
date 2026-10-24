@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { LogOut, Menu, X } from "lucide-react";
 import { BrandLockup, BrandMark, TrackLines } from "@/components/brand/brand";
@@ -113,8 +113,6 @@ function SidebarContent({ user, onNavigate }: { user: ShellUser; onNavigate?: ()
 
 export function AppShell({ user, children }: { user: ShellUser; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  useEffect(() => setOpen(false), [pathname]);
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">

@@ -302,15 +302,21 @@ isOneToOne: false
           Views: {
             "athlete_overview": {
                   Row: {
-                    "created_at": string,"days_remaining": number | null,"ends_on": string | null,"expiring_soon": boolean | null,"has_next_subscription": boolean | null,"id": string,"last_visit_at": string | null,"matricule": string,"plan_name": string | null,"registered_on": string,"starts_on": string | null,"status": string | null,"subscription_id": string | null,"subscription_state": Database["public"]['Enums']["subscription_state"] | null,"visit_count": number | null
+                    "created_at": string,"days_remaining": number | null,"ends_on": string | null,"expiring_soon": boolean | null,"has_next_subscription": boolean | null,"id": string,"last_visit_at": string | null,"matricule": string,"plan_id": string | null,"plan_name": string | null,"registered_on": string,"starts_on": string | null,"status": string | null,"subscription_id": string | null,"subscription_state": Database["public"]['Enums']["subscription_state"] | null,"visit_count": number | null
                   }
                   ComputedFields: never
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "subscriptions_plan_id_fkey"
+      columns: ["plan_id"]
+isOneToOne: false
+      referencedRelation: "subscription_plans"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"audit_log_view": {
                   Row: {
-                    "action": string,"actor_id": string | null,"actor_name": string | null,"actor_role": Database["public"]['Enums']["app_role"] | null,"details": NonNullable<Json>,"entity_id": string | null,"entity_type": string,"id": number,"matricule": string | null,"occurred_at": string
+                    "action": string,"actor_id": string | null,"actor_name": string | null,"actor_role": Database["public"]['Enums']["app_role"] | null,"details": NonNullable<Json>,"entity_id": string | null,"entity_type": string,"id": number,"matricule": string | null,"occurred_at": string,"target_staff_name": string | null
                   }
                   ComputedFields: never
                   Relationships: [
@@ -577,6 +583,9 @@ isOneToOne: false
 { Args: { "p_from": string,"p_to": string }; Returns: {
               "entries": number,"hour": number,"iso_dow": number
             }[]
+                           },
+"stats_period_summary":
+{ Args: { "p_from": string,"p_to": string }; Returns: Json
                            },
 "stats_revenue":
 { Args: { "p_from": string,"p_to": string }; Returns: {

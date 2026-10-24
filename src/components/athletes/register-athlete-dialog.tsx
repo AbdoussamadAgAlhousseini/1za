@@ -119,7 +119,12 @@ export function RegisterAthleteDialog({
                   onValueChange={(v) => {
                     setMatricule(v);
                     setIsDuplicate(false);
-                    if (errors.matricule) setErrors(({ matricule: _m, ...rest }) => rest);
+                    if (errors.matricule)
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.matricule;
+                        return next;
+                      });
                   }}
                   onBlur={() => setTouched(true)}
                 />

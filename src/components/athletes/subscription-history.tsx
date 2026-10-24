@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/ui/states";
 import { ReasonDialog } from "@/components/subscriptions/reason-dialog";
 import { PaymentDialog, type PaymentTarget } from "@/components/subscriptions/payment-dialog";
 import { cancelPayment, setSubscriptionState } from "@/server/actions/subscriptions";
-import { formatDate, formatMoney } from "@/lib/domain/format";
+import { formatDate, formatMoney, pluralize } from "@/lib/domain/format";
 import { formatMatricule } from "@/lib/domain/matricule";
 import { PAYMENT_METHOD_LABELS, type PaymentMethod, type SubscriptionValidity } from "@/lib/domain/status";
 import type { AthleteDetail } from "@/server/queries/athletes";
@@ -78,7 +78,7 @@ export function SubscriptionHistory({
                         {s.renewed_from_id ? <Badge tone="neutral">Renouvellement</Badge> : null}
                       </div>
                       <p className="tabular mt-1 text-[13px] text-ink-muted">
-                        {formatDate(s.starts_on)} → {formatDate(s.ends_on)} · {s.length_days} j
+                        {formatDate(s.starts_on)} → {formatDate(s.ends_on)} · {pluralize(s.length_days ?? 0, "jour")}
                       </p>
                       {s.state_reason ? (
                         <p className="mt-1 text-xs text-ink-muted">

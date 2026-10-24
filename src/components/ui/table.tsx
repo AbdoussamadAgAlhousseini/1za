@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode, TdHTMLAttributes, ThHTMLAttributes } fr
 import { cn } from "@/lib/cn";
 
 export function TableContainer({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("overflow-x-auto", className)}>{children}</div>;
+  return <div className={cn("relative overflow-x-auto", className)}>{children}</div>;
 }
 
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
