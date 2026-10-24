@@ -5,7 +5,7 @@ import { z } from "zod";
 import { reasonSchema, uuidSchema } from "@/lib/validation/common";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/server/auth";
-import { fail, fromDbError, fromZodError } from "@/server/action-result";
+import { fromDbError, fromZodError } from "@/server/action-result";
 import type { ActionResult } from "@/lib/action-types";
 import { athleteListSchema, PAGE_SIZE, registerAthleteSchema, type AthleteListInput } from "@/lib/validation/athletes";
 import type { PaymentMethod } from "@/lib/domain/status";
@@ -135,15 +135,6 @@ export async function registerAthlete(input: RegisterAthleteInput): Promise<Acti
   }
 
   return { ok: true, data: { athleteId }, message: "Sportif enregistré." };
-}
-
-export async function checkMatriculeAvailability(raw: string): Promise<ActionResult<{ available: boolean; athleteId?: string }>> {
-  await requireAdmin();
-  const parsed = registerAthleteSchema.shape.matricule.safeParse(raw);
-  if (!parsed.success) return fail("Format invalide.");
-  const supabase = await createClient();
-  const { data } = await supabase.from("athletes").select("id").eq("matricule", parsed.data).maybeSingle();
-  return { ok: true, data: { available: !data, athleteId: data?.id } };
 }
 
 export async function deleteAthlete(input: {

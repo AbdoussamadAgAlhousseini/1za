@@ -23,5 +23,3 @@ export const reasonSchema = z
   .trim()
   .min(5, "Le motif doit comporter au moins 5 caractères.")
   .max(300, "300 caractères maximum.");
-
-export const pageSchema = z.coerce.number().int().min(1).max(100_000).default(1);
