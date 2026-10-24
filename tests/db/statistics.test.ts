@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { createAthlete, createStaff, dbTestsEnabled, shiftDate, today, type Client } from "./helpers";
+import type { DashboardStats } from "@/lib/stats-types";
 
 describe.skipIf(!dbTestsEnabled)("statistiques", () => {
   let admin: Client;
@@ -16,7 +17,7 @@ describe.skipIf(!dbTestsEnabled)("statistiques", () => {
   });
 
   it("distingue entrées, sportifs uniques et visites terminées", async () => {
-    const before = (await admin.rpc("stats_dashboard")).data as Record<string, number>;
+    const before = (await admin.rpc("stats_dashboard")).data as unknown as DashboardStats;
 
     const a1 = await createAthlete(admin, { start: t, end: t });
     const a2 = await createAthlete(admin, { start: t, end: t });
@@ -27,7 +28,7 @@ describe.skipIf(!dbTestsEnabled)("statistiques", () => {
     }
     expect((await agent.rpc("control_record_entry", { p_matricule: a2.matricule })).error).toBeNull();
 
-    const after = (await admin.rpc("stats_dashboard")).data as Record<string, number>;
+    const after = (await admin.rpc("stats_dashboard")).data as unknown as DashboardStats;
     expect(after.entries_today - before.entries_today).toBe(3);
     expect(after.unique_today - before.unique_today).toBe(2);
     expect(after.completed_today - before.completed_today).toBe(2);
