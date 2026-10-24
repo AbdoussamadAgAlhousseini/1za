@@ -35,9 +35,10 @@ interface TooltipProps {
   active?: boolean;
   payload?: { payload: AttendancePoint }[];
   granularity: Granularity;
+  showUnique?: boolean;
 }
 
-function ChartTooltip({ active, payload, granularity }: TooltipProps) {
+function ChartTooltip({ active, payload, granularity, showUnique = true }: TooltipProps) {
   const point = payload?.[0]?.payload;
   if (!active || !point) return null;
   return (
@@ -51,7 +52,7 @@ function ChartTooltip({ active, payload, granularity }: TooltipProps) {
           </dt>
           <dd className="tabular font-semibold text-ink">{formatNumber(point.entries)}</dd>
         </div>
-        <div className="flex items-center justify-between gap-6">
+        <div className={showUnique ? "flex items-center justify-between gap-6" : "hidden"}>
           <dt className="flex items-center gap-2 text-ink-muted">
             <span className="size-2.5 rounded-full bg-chart-2" aria-hidden="true" />
             Sportifs uniques
@@ -79,10 +80,12 @@ export function AttendanceChart({
   data,
   granularity,
   height = 280,
+  showUnique = true,
 }: {
   data: AttendancePoint[];
   granularity: Granularity;
   height?: number;
+  showUnique?: boolean;
 }) {
   const tickInterval = data.length > 16 ? Math.ceil(data.length / 8) - 1 : 0;
   return (
@@ -109,10 +112,11 @@ export function AttendanceChart({
           />
           <Tooltip
             cursor={{ fill: "var(--color-surface-sunken)", opacity: 0.7 }}
-            content={<ChartTooltip granularity={granularity} />}
+            content={<ChartTooltip granularity={granularity} showUnique={showUnique} />}
             isAnimationActive={false}
           />
           <Bar dataKey="entries" name="Entrées" fill={SERIES_ENTRIES} radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+          {showUnique ? (
           <Line
             dataKey="unique_athletes"
             name="Sportifs uniques"
@@ -123,6 +127,7 @@ export function AttendanceChart({
             activeDot={{ r: 5, stroke: "var(--color-surface)", strokeWidth: 2, fill: SERIES_UNIQUE }}
             isAnimationActive={false}
           />
+          ) : null}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

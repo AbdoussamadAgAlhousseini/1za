@@ -141,14 +141,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"deactivated_at": string | null,"display_name": string,"id": string,"is_active": boolean,"role": Database["public"]['Enums']["app_role"],"updated_at": string
+                    "created_at": string,"deactivated_at": string | null,"display_name": string,"id": string,"is_active": boolean,"login_phone": string | null,"role": Database["public"]['Enums']["app_role"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"deactivated_at"?: string | null,"display_name": string,"id": string,"is_active"?: boolean,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
+                    "created_at"?: string,"deactivated_at"?: string | null,"display_name": string,"id": string,"is_active"?: boolean,"login_phone"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"deactivated_at"?: string | null,"display_name"?: string,"id"?: string,"is_active"?: boolean,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
+                    "created_at"?: string,"deactivated_at"?: string | null,"display_name"?: string,"id"?: string,"is_active"?: boolean,"login_phone"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -487,14 +487,17 @@ isOneToOne: false
 "admin_create_subscription":
 { Args: { "p_athlete_id": string,"p_ends_on"?: string,"p_paid_on"?: string,"p_payment_amount"?: number,"p_payment_currency"?: string,"p_payment_method"?: Database["public"]['Enums']["payment_method"],"p_payment_reference"?: string,"p_plan_id": string,"p_renewed_from_id"?: string,"p_starts_on": string }; Returns: string
                            },
+"admin_log_agent_password_reset":
+{ Args: { "p_user_id": string }; Returns: undefined
+                           },
 "admin_log_export":
 { Args: { "p_kind": string,"p_params": Json }; Returns: undefined
                            },
 "admin_record_payment":
 { Args: { "p_amount": number,"p_athlete_id": string,"p_currency": string,"p_method": Database["public"]['Enums']["payment_method"],"p_paid_on": string,"p_reference"?: string,"p_subscription_id": string }; Returns: string
                            },
-"admin_register_staff":
-{ Args: { "p_display_name": string,"p_role": Database["public"]['Enums']["app_role"],"p_user_id": string }; Returns: undefined
+"admin_register_agent":
+{ Args: { "p_display_name": string,"p_login_phone": string,"p_user_id": string }; Returns: undefined
                            },
 "admin_save_plan":
 { Args: { "p_currency": string,"p_duration_days": number,"p_id": string,"p_is_active": boolean,"p_name": string,"p_price": number }; Returns: string
@@ -504,6 +507,9 @@ isOneToOne: false
                            },
 "admin_set_subscription_state":
 { Args: { "p_reason": string,"p_state": Database["public"]['Enums']["subscription_state"],"p_subscription_id": string }; Returns: undefined
+                           },
+"admin_update_agent":
+{ Args: { "p_display_name": string,"p_user_id": string }; Returns: undefined
                            },
 "admin_update_settings":
 { Args: { "p_default_currency": string,"p_expiring_soon_days": number,"p_long_visit_hours": number,"p_stadium_name": string,"p_timezone": string }; Returns: undefined
@@ -544,6 +550,9 @@ isOneToOne: false
                            },
 "is_valid_matricule":
 { Args: { "p_value": string }; Returns: boolean
+                           },
+"log_own_password_change":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "normalize_matricule":
 { Args: { "p_value": string }; Returns: string

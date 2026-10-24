@@ -33,6 +33,9 @@ const nextConfig: NextConfig = {
   // Application entièrement authentifiée : rendu dynamique à chaque requête
   // (modèle de cache « classique », sans Cache Components).
   poweredByHeader: false,
+  // Ne jamais journaliser les arguments des actions serveur (mots de passe,
+  // matricules) dans la console de développement.
+  logging: { serverFunctions: false },
   reactStrictMode: true,
   turbopack: {
     rules: {

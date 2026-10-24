@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "./database.types";
 
-const PUBLIC_PATHS = ["/connexion", "/mot-de-passe-oublie", "/auth/callback", "/reinitialiser-mot-de-passe"];
+const PUBLIC_PATHS = ["/connexion", "/hors-ligne", "/manifest.webmanifest", "/sw.js"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

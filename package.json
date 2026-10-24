@@ -12,7 +12,9 @@
     "test:db": "vitest run --project db",
     "typecheck": "tsc --noEmit",
     "e2e": "playwright test",
-    "seed:dev": "node scripts/seed-dev.mjs"
+    "seed:dev": "node scripts/seed-dev.mjs",
+    "admin:create": "node scripts/admin-account.mjs create",
+    "admin:reset-password": "node scripts/admin-account.mjs reset-password"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",

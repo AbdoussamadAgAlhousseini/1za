@@ -8,13 +8,23 @@ import { cn } from "@/lib/cn";
 import { AttendanceChart, AttendanceLegend, AttendanceTable } from "./attendance-chart";
 
 /** Graphique de fréquentation avec bascule vers la vue tableau. */
-export function AttendancePanel({ data, granularity, height }: { data: AttendancePoint[]; granularity: Granularity; height?: number }) {
+export function AttendancePanel({
+  data,
+  granularity,
+  height,
+  showUnique = true,
+}: {
+  data: AttendancePoint[];
+  granularity: Granularity;
+  height?: number;
+  showUnique?: boolean;
+}) {
   const [view, setView] = useState<"chart" | "table">("chart");
   const empty = data.every((p) => p.entries === 0);
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <AttendanceLegend />
+        {showUnique ? <AttendanceLegend /> : <span />}
         <div className="no-print inline-flex rounded-md border border-line bg-surface-muted p-0.5" role="group" aria-label="Mode d'affichage">
           {(
             [
@@ -43,7 +53,7 @@ export function AttendancePanel({ data, granularity, height }: { data: Attendanc
           Aucune entrée enregistrée sur cette période.
         </div>
       ) : view === "chart" ? (
-        <AttendanceChart data={data} granularity={granularity} height={height} />
+        <AttendanceChart data={data} granularity={granularity} height={height} showUnique={showUnique} />
       ) : (
         <div className="max-h-[320px] overflow-y-auto">
           <AttendanceTable data={data} granularity={granularity} />

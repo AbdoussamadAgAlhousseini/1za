@@ -33,10 +33,11 @@ if (!serviceKey) {
 
 const db = createClient(url, serviceKey, { auth: { persistSession: false } });
 
+// ⚠ Domaine technique identique à src/lib/auth/identity.ts.
 const ACCOUNTS = [
-  { email: "admin@stade26.test", password: "Admin-Stade-2026", role: "admin", name: "Direction du stade" },
-  { email: "agent1@stade26.test", password: "Agent-Stade-2026", role: "agent", name: "Moussa Diarra" },
-  { email: "agent2@stade26.test", password: "Agent-Stade-2026", role: "agent", name: "Awa Traoré" },
+  { key: "admin", email: "administration@stade26.invalid", password: "Admin-Stade-2026", role: "admin", name: "Direction du stade", phone: null, login: "onglet Administration" },
+  { key: "agent1", email: "agent.22370000001@stade26.invalid", password: "Agent-Stade-2026", role: "agent", name: "Agent de démonstration 1", phone: "22370000001", login: "70 00 00 01" },
+  { key: "agent2", email: "agent.22370000002@stade26.invalid", password: "Agent-Stade-2026", role: "agent", name: "Agent de démonstration 2", phone: "22370000002", login: "70 00 00 02" },
 ];
 
 let seed = 26032026;
@@ -84,8 +85,8 @@ async function main() {
       );
       user = created.user;
     }
-    ids[acc.email.split("@")[0]] = user.id;
-    await db.from("profiles").upsert({ id: user.id, role: acc.role, display_name: acc.name, is_active: true });
+    ids[acc.key] = user.id;
+    await db.from("profiles").upsert({ id: user.id, role: acc.role, display_name: acc.name, login_phone: acc.phone, is_active: true });
   }
 
   const today = await must(db.rpc("app_today"), "app_today");
@@ -201,7 +202,7 @@ async function main() {
 
   console.log(`✔ ${insertedAthletes.length} sportifs, ${insertedSubs.length} abonnements, ${payments.length} paiements, ${cleaned.length} passages.`);
   console.log("Comptes de démonstration (locaux uniquement) :");
-  for (const acc of ACCOUNTS) console.log(`  ${acc.role.padEnd(5)}  ${acc.email}  /  ${acc.password}`);
+  for (const acc of ACCOUNTS) console.log(`  ${acc.role.padEnd(5)}  ${acc.login.padEnd(22)}  mot de passe : ${acc.password}`);
 }
 
 main();

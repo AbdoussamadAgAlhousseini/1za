@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import { ROLE_LABELS, type AppRole } from "@/lib/domain/status";
 import { signOut } from "@/server/actions/auth";
 import { navigationFor } from "./navigation";
+import { InstallAppButton } from "@/components/pwa/install-app-card";
 
 interface ShellUser {
   displayName: string;
@@ -102,7 +103,8 @@ function SidebarContent({ user, onNavigate }: { user: ShellUser; onNavigate?: ()
       <div className="relative flex-1 overflow-y-auto px-3 pb-6">
         <NavLinks role={user.role} onNavigate={onNavigate} />
       </div>
-      <div className="relative border-t border-white/10 p-3">
+      <div className="relative space-y-2 border-t border-white/10 p-3">
+        <InstallAppButton />
         <UserPanel user={user} />
       </div>
     </div>
@@ -129,7 +131,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: React.
         </aside>
       </div>
 
-      <header className="no-print sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-pitch-950/40 bg-pitch-900 px-4 text-white lg:hidden">
+      <header className="no-print sticky top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center pt-[env(safe-area-inset-top)] justify-between gap-3 border-b border-pitch-950/40 bg-pitch-900 px-4 text-white lg:hidden">
         <Link href="/" className="flex items-center gap-2.5" aria-label="Accueil">
           <BrandMark className="size-8" />
           <span className="font-display text-base font-semibold uppercase tracking-[0.06em]">{user.stadiumName}</span>

@@ -35,7 +35,12 @@ export async function createStaff(role: "admin" | "agent", options: { withProfil
   if (options.withProfile !== false) {
     const { error: profileError } = await service
       .from("profiles")
-      .insert({ id: data.user.id, role, display_name: `Test ${role}` });
+      .insert({
+        id: data.user.id,
+        role,
+        display_name: `Test ${role}`,
+        login_phone: role === "agent" ? `223${String(randomInt(10 ** 8)).padStart(8, "0")}` : null,
+      });
     if (profileError) throw profileError;
   }
 

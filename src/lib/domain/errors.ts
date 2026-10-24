@@ -27,6 +27,7 @@ export const ERROR_MESSAGES = {
   ERR_INVALID_INPUT: "Certaines informations sont invalides. Vérifiez le formulaire.",
   ERR_SELF_ACTION: "Vous ne pouvez pas effectuer cette opération sur votre propre compte.",
   ERR_PROFILE_EXISTS: "Ce compte possède déjà un profil.",
+  ERR_PHONE_DUPLICATE: "Ce numéro de téléphone est déjà utilisé par un autre compte.",
   ERR_USER_NOT_FOUND: "Compte introuvable.",
   ERR_IMMUTABLE: "Cette donnée historique ne peut pas être modifiée.",
 } as const;

@@ -10,6 +10,7 @@ import {
   Users,
   Wallet,
   Footprints,
+  KeyRound,
 } from "lucide-react";
 import type { AppRole } from "@/lib/domain/status";
 
@@ -53,12 +54,14 @@ const ADMIN_NAV: NavSection[] = [
     items: [
       { href: "/personnel", label: "Personnel", icon: UserCog },
       { href: "/parametres", label: "Paramètres", icon: Settings2 },
+      { href: "/mon-compte", label: "Mon compte", icon: KeyRound },
     ],
   },
 ];
 
 const AGENT_NAV: NavSection[] = [
   { title: "Service", items: [{ href: "/controle", label: "Contrôle d'accès", icon: ScanLine }] },
+  { title: "Compte", items: [{ href: "/mon-compte", label: "Mon compte", icon: KeyRound }] },
 ];
 
 export function navigationFor(role: AppRole): NavSection[] {
